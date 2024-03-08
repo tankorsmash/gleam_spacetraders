@@ -1,7 +1,9 @@
 import gleam/io
 import dotenv
 import gleam/erlang/os
-import falcon.{type Client, type FalconResponse}
+import gleam/string
+import gleam/list
+import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
@@ -133,9 +135,16 @@ fn decode_contract_response() {
   )
 }
 
-fn get_contracts(client) {
+fn get_contracts(
+  client,
+) -> Result(FalconResponse(Response(List(Contract))), FalconError) {
   client
-  |> falcon.get("/my/contracts", expecting: Raw(fn(a) { Ok(a) }), options: [])
+  // |> falcon.get("/my/contracts", expecting: Raw(fn(a) { Ok(a) }), options: [])
+  |> falcon.get(
+    "/my/contracts",
+    expecting: Json(decode_contract_response()),
+    options: [],
+  )
   |> io.debug
 }
 
@@ -154,6 +163,10 @@ pub fn main() {
   dotenv.config()
 
   let client = create_client()
-  get_contracts(client)
-  io.println("Hello from spacetraders!: ")
+  let assert Ok(contract_resp) = get_contracts(client)
+  let contracts: List(Contract) = contract_resp.body.data
+  io.println(
+    "Hello from spacetraders!: "
+    <> string.join(list.map(contracts, fn(c) { c.type_ }), "-"),
+  )
 }
