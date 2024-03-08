@@ -1,5 +1,6 @@
 import gleam/io
 import dotenv
+// import gleam_stdlib
 import gleam/erlang/os
 import gleam/string
 import gleam/list
@@ -21,14 +22,38 @@ fn create_client() -> Client {
   client
 }
 
+pub fn expect_status(status: Int) {
+  fn(resp: FalconResponse(anything)) {
+    should.be_true(resp.status == status)
+    resp
+  }
+}
+
 pub fn main() {
   dotenv.config()
 
   let client = create_client()
-  let assert Ok(contract_resp) = contract.get_my_contracts(client)
-  let contracts: List(Contract) = contract_resp.body.data
-  io.println(
-    "Hello from spacetraders!: "
-    <> string.join(list.map(contracts, fn(c) { c.type_ }), "-"),
+  // let assert Ok(contract_resp) = contract.get_my_contracts(client)
+  // let contracts: List(Contract) = contract_resp.body.data
+  // io.println(
+  //   "Hello from spacetraders!: "
+  //   <> string.join(list.map(contracts, fn(c) { c.type_ }), "-"),
+  // )
+  io.debug("WTF")
+  let temp_client =
+    falcon.new(
+      base_url: Url("http://httpbin.org/"),
+      headers: [],
+      timeout: falcon.default_timeout,
+    )
+  temp_client
+  |> falcon.post(
+    "/status/404",
+    expecting: Raw(fn(a) { Ok(a) }),
+    options: [],
+    body: "",
   )
+  |> should.be_ok
+  |> expect_status(404)
+  |> io.debug
 }

@@ -105,3 +105,15 @@ pub fn get_my_contracts(
   )
   |> io.debug
 }
+
+pub fn accept_contract(client: Client, contract_id: String) {
+  client
+  |> falcon.post(
+    "/my/contracts/"
+    <> contract_id
+    <> "/accept",
+    expecting: Json(decode_contract()),
+    options: [],
+    body: "",
+  )
+}
