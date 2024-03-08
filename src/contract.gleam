@@ -94,7 +94,7 @@ pub fn decode_contract_response() {
   )
 }
 
-pub fn get_contracts(
+pub fn get_my_contracts(
   client,
 ) -> Result(FalconResponse(st_response.Response(List(Contract))), FalconError) {
   client

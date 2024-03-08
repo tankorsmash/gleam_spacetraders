@@ -10,18 +10,6 @@ import gleeunit/should
 import st_response.{type Response}
 import contract.{type Contract, decode_contract_response}
 
-fn get_contracts(
-  client,
-) -> Result(FalconResponse(Response(List(Contract))), FalconError) {
-  client
-  |> falcon.get(
-    "/my/contracts",
-    expecting: Json(decode_contract_response()),
-    options: [],
-  )
-  |> io.debug
-}
-
 fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
   let client =
@@ -37,7 +25,7 @@ pub fn main() {
   dotenv.config()
 
   let client = create_client()
-  let assert Ok(contract_resp) = get_contracts(client)
+  let assert Ok(contract_resp) = contract.get_my_contracts(client)
   let contracts: List(Contract) = contract_resp.body.data
   io.println(
     "Hello from spacetraders!: "
