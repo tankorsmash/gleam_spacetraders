@@ -29,10 +29,6 @@ pub fn expect_status(status: Int) {
   }
 }
 
-fn get_body(resp: FalconResponse(anything)) {
-  resp.body
-}
-
 pub fn main() {
   dotenv.config()
 

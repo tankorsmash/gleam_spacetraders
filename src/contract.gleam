@@ -8,6 +8,7 @@ import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 import st_response
+import st_agent
 
 pub type Deliver {
   Deliver(
@@ -94,9 +95,7 @@ pub fn decode_contract_response() {
   )
 }
 
-pub fn get_my_contracts(
-  client,
-) -> Result(FalconResponse(st_response.Response(List(Contract))), FalconError) {
+pub fn get_my_contracts(client) -> st_response.WebResponse(List(Contract)) {
   client
   |> falcon.get(
     "/my/contracts",
@@ -105,13 +104,24 @@ pub fn get_my_contracts(
   )
 }
 
-pub fn accept_contract(client: Client, contract_id: String) {
+pub type AcceptContract {
+  AcceptContract(st_agent.Agent, Contract)
+}
+
+pub fn accept_contract(
+  client: Client,
+  contract_id: String,
+) -> st_response.WebResult(AcceptContract) {
   client
   |> falcon.post(
     "/my/contracts/"
     <> contract_id
     <> "/accept",
-    expecting: Json(decode_contract()),
+    expecting: Json(dynamic.decode2(
+      AcceptContract,
+      st_agent.decode_agent(),
+      decode_contract(),
+    )),
     options: [],
     body: "",
   )

@@ -16,6 +16,12 @@ pub type Response(data) {
   Response(data: data, meta: Meta)
 }
 
+pub type WebResult(data) =
+  Result(FalconResponse(data), FalconError)
+
+pub type WebResponse(data) =
+  Result(FalconResponse(Response(data)), FalconError)
+
 pub fn decode_meta() {
   dynamic.decode3(
     Meta,
