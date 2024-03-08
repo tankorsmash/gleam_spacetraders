@@ -29,31 +29,18 @@ pub fn expect_status(status: Int) {
   }
 }
 
+fn get_body(resp: FalconResponse(anything)) {
+  resp.body
+}
+
 pub fn main() {
   dotenv.config()
 
   let client = create_client()
-  // let assert Ok(contract_resp) = contract.get_my_contracts(client)
-  // let contracts: List(Contract) = contract_resp.body.data
-  // io.println(
-  //   "Hello from spacetraders!: "
-  //   <> string.join(list.map(contracts, fn(c) { c.type_ }), "-"),
-  // )
-  io.debug("WTF")
-  let temp_client =
-    falcon.new(
-      base_url: Url("http://httpbin.org/"),
-      headers: [],
-      timeout: falcon.default_timeout,
-    )
-  temp_client
-  |> falcon.post(
-    "/status/404",
-    expecting: Raw(fn(a) { Ok(a) }),
-    options: [],
-    body: "",
-  )
+  client
+  |> contract.get_my_contracts
   |> should.be_ok
-  |> expect_status(404)
+  |> expect_status(200)
+  |> get_body
   |> io.debug
 }

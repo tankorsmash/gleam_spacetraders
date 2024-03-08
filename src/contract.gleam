@@ -103,7 +103,6 @@ pub fn get_my_contracts(
     expecting: Json(decode_contract_response()),
     options: [],
   )
-  |> io.debug
 }
 
 pub fn accept_contract(client: Client, contract_id: String) {
