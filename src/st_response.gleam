@@ -38,3 +38,7 @@ pub fn decode_response(field_decoder) {
     dynamic.field("meta", decode_meta()),
   )
 }
+
+pub fn decode_data(field_decoder) {
+    dynamic.field("data", field_decoder)
+}

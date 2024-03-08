@@ -112,16 +112,19 @@ pub fn accept_contract(
   client: Client,
   contract_id: String,
 ) -> st_response.WebResult(AcceptContract) {
+  let decoder =
+    st_response.decode_data(dynamic.decode2(
+      AcceptContract,
+      st_agent.decode_agent(),
+      decode_contract(),
+    ))
+
   client
   |> falcon.post(
     "/my/contracts/"
     <> contract_id
     <> "/accept",
-    expecting: Json(dynamic.decode2(
-      AcceptContract,
-      st_agent.decode_agent(),
-      decode_contract(),
-    )),
+    expecting: Json(decoder),
     options: [],
     body: "",
   )

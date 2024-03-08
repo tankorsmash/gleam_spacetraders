@@ -34,24 +34,32 @@ fn extract_data(resp: Response(data)) -> data {
   resp.data
 }
 
+const contract_id: String = "clthywl03m46cs60cl8ezck89"
+
 pub fn main() {
   dotenv.config()
 
   let client = create_client()
   client
-  |> contract.get_my_contracts
+  // |> contract.get_my_contracts
+  // |> should.be_ok
+  // |> expect_status(200)
+  // |> core.extract_body
+  // |> extract_data
+  // |> fn(b) { list.at(b, 0) }
+  // |> should.be_ok
+  // |> fn(contract: Contract) {
+  //   io.debug(
+  //     "Has contract been accepted ?: "
+  //     <> bool.to_string(contract.accepted),
+  //   )
+  //   contract
+  // }
+  // |> io.debug
+
+  |> contract.accept_contract(contract_id)
   |> should.be_ok
   |> expect_status(200)
   |> core.extract_body
-  |> extract_data
-  |> fn(b) { list.at(b, 0) }
-  |> should.be_ok
-  |> fn(contract: Contract) {
-    io.debug(
-      "Has contract been accepted ?: "
-      <> bool.to_string(contract.accepted),
-    )
-    contract
-  }
   |> io.debug
 }
