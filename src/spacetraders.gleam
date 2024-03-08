@@ -41,6 +41,6 @@ pub fn main() {
   |> contract.get_my_contracts
   |> should.be_ok
   |> expect_status(200)
-  |> get_body
+  |> core.extract_body
   |> io.debug
 }
