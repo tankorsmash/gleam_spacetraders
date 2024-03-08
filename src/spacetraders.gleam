@@ -4,6 +4,7 @@ import dotenv
 import gleam/erlang/os
 import gleam/string
 import gleam/list
+import gleam/bool
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
@@ -29,6 +30,10 @@ pub fn expect_status(status: Int) {
   }
 }
 
+fn extract_data(resp: Response(data)) -> data {
+  resp.data
+}
+
 pub fn main() {
   dotenv.config()
 
@@ -38,5 +43,15 @@ pub fn main() {
   |> should.be_ok
   |> expect_status(200)
   |> core.extract_body
+  |> extract_data
+  |> fn(b) { list.at(b, 0) }
+  |> should.be_ok
+  |> fn(contract: Contract) {
+    io.debug(
+      "Has contract been accepted ?: "
+      <> bool.to_string(contract.accepted),
+    )
+    contract
+  }
   |> io.debug
 }
