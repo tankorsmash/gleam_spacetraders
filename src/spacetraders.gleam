@@ -9,7 +9,7 @@ import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
-import st_response.{type Response}
+import st_response.{type ApiResponse}
 import contract.{type Contract, decode_contract_response}
 
 fn create_client() -> Client {
@@ -37,8 +37,15 @@ pub fn expect_status(status: Int) {
   }
 }
 
-fn extract_data(resp: Response(data)) -> data {
+fn extract_data(resp: ApiResponse(data)) -> data {
   resp.data
+}
+
+pub fn expect_200_body(resp: st_response.WebResult(value)) -> value {
+  resp
+  |> should.be_ok
+  |> expect_status(200)
+  |> core.extract_body
 }
 
 const contract_id: String = "clthywl03m46cs60cl8ezck89"
@@ -47,25 +54,16 @@ pub fn main() {
   dotenv.config()
   let client = create_client()
   client
-  // |> contract.get_my_contracts
-  // |> should.be_ok
-  // |> expect_status(200)
-  // |> core.extract_body
-  // |> extract_data
-  // |> fn(b) { list.at(b, 0) }
-  // |> should.be_ok
-  // |> fn(contract: Contract) {
-  //   io.debug(
-  //     "Has contract been accepted ?: "
-  //     <> bool.to_string(contract.accepted),
-  //   )
-  //   contract
-  // }
-  // |> io.debug
-
-  |> contract.accept_contract(contract_id)
-  |> should.be_ok
-  |> expect_status(200)
-  |> core.extract_body
+  |> contract.get_my_contracts
+  |> expect_200_body
+  |> extract_data
+  |> list.map(with: fn(contract: Contract) {
+    io.debug(
+      "Has contract been accepted ?: " <> bool.to_string(contract.accepted),
+    )
+  })
   |> io.debug
+  // |> contract.accept_contract(contract_id)
+  // |> expect_200_body
+  // |> io.debug
 }

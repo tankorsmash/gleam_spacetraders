@@ -12,15 +12,15 @@ pub type Meta {
   Meta(total: Int, page: Int, limit: Int)
 }
 
-pub type Response(data) {
-  Response(data: data, meta: Meta)
+pub type ApiResponse(data) {
+  ApiResponse(data: data, meta: Meta)
 }
 
 pub type WebResult(data) =
   Result(FalconResponse(data), FalconError)
 
 pub type WebResponse(data) =
-  Result(FalconResponse(Response(data)), FalconError)
+  Result(FalconResponse(ApiResponse(data)), FalconError)
 
 pub fn decode_meta() {
   dynamic.decode3(
@@ -33,12 +33,12 @@ pub fn decode_meta() {
 
 pub fn decode_response(field_decoder) {
   dynamic.decode2(
-    Response,
+    ApiResponse,
     dynamic.field("data", field_decoder),
     dynamic.field("meta", decode_meta()),
   )
 }
 
 pub fn decode_data(field_decoder) {
-    dynamic.field("data", field_decoder)
+  dynamic.field("data", field_decoder)
 }
