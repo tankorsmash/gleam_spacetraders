@@ -23,6 +23,13 @@ fn create_client() -> Client {
   client
 }
 
+// // @external(erlang, "./openai/space_traders_api/api/agents.ex", "get_agent")
+// @external(erlang, "Elixir.SpaceTradersAPI.Api.Agents", "get_agent")
+// pub fn get_agent(a: String, b: String) -> Result(String, String)
+
+// @external(erlang, "Elixir.SpaceTradersAPI.Connection", "new")
+// pub fn new_elixir_client() -> String
+
 pub fn expect_status(status: Int) {
   fn(resp: FalconResponse(anything)) {
     should.be_true(resp.status == status)
@@ -38,7 +45,6 @@ const contract_id: String = "clthywl03m46cs60cl8ezck89"
 
 pub fn main() {
   dotenv.config()
-
   let client = create_client()
   client
   // |> contract.get_my_contracts
