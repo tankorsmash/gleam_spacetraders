@@ -2,6 +2,7 @@ import gleam/io
 import dotenv
 import gleam/erlang/os
 import gleam/string
+import gleam/option.{type Option}
 import gleam/result
 import gleam/list
 import falcon.{type Client, type FalconError, type FalconResponse}
@@ -47,15 +48,15 @@ import st_response
 // 	"isUnderConstruction": true
 // }
 
-pub type System {
-  System(
+pub type Waypoint {
+  Waypoint(
     symbol: String,
     type_: String,
     system_symbol: String,
     x: Int,
     y: Int,
     orbitals: List(Orbital),
-    orbits: String,
+    orbits: Option(String),
     faction: Faction,
     traits: List(Trait),
     modifiers: List(Modifier),
@@ -81,10 +82,14 @@ pub type Modifier {
 }
 
 pub type Chart {
-  Chart(waypoint_symbol: String, submitted_by: String, submitted_on: String)
+  Chart(
+    waypoint_symbol: Option(String),
+    submitted_by: String,
+    submitted_on: String,
+  )
 }
 
-pub fn decode_system() {
+pub fn decode_waypoint() {
   fn(value) {
     let sym = dynamic.field("symbol", dynamic.string)
     let type_ = dynamic.field("type", dynamic.string)
@@ -92,7 +97,7 @@ pub fn decode_system() {
     let x = dynamic.field("x", dynamic.int)
     let y = dynamic.field("y", dynamic.int)
     let orbs = dynamic.field("orbitals", dynamic.list(decode_orbital()))
-    let orbits = dynamic.field("orbits", dynamic.string)
+    let orbits = dynamic.optional_field("orbits", dynamic.string)
     let faction =
       dynamic.field("faction", dynamic.decode1(Faction, decode_faction()))
     let traits = dynamic.field("traits", dynamic.list(decode_trait()))
@@ -114,7 +119,7 @@ pub fn decode_system() {
     use actual_chart <- result.try(chart(value))
     use actual_is_under_construction <- result.try(is_under_construction(value))
 
-    Ok(System(
+    Ok(Waypoint(
       symbol: actual_sym,
       type_: actual_type,
       system_symbol: actual_syssym,
@@ -130,7 +135,7 @@ pub fn decode_system() {
     ))
   }
   // dynamic.decode9(
-  //   System,
+  //   Waypoint,
   //   dynamic.field("symbol", dynamic.string),
   //   dynamic.field("type", dynamic.string),
   //   dynamic.field("systemSymbol", dynamic.string),
@@ -184,8 +189,23 @@ pub fn decode_modifier() {
 pub fn decode_chart() {
   dynamic.decode3(
     Chart,
-    dynamic.field("waypointSymbol", dynamic.string),
+    dynamic.optional_field("waypointSymbol", dynamic.string),
     dynamic.field("submittedBy", dynamic.string),
     dynamic.field("submittedOn", dynamic.string),
+  )
+}
+
+pub fn get_waypoints_for_system(
+  client: falcon.Client,
+  system_name: String,
+  traits: List(Trait),
+) {
+  let decoder = st_response.decode_data(dynamic.list(decode_waypoint()))
+  client
+  |> falcon.get(
+    "systems/" <> system_name <> "/waypoints",
+    expecting: Json(decoder),
+    // expecting: Raw(dynamic.dynamic),
+    options: [],
   )
 }
