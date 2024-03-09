@@ -61,6 +61,7 @@ pub fn main() {
     io.debug(
       "Has contract been accepted ?: " <> bool.to_string(contract.accepted),
     )
+    contract
   })
   |> io.debug
   // |> contract.accept_contract(contract_id)
