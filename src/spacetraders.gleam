@@ -71,7 +71,8 @@ pub fn main() {
   // |> io.debug
 
   |> st_waypoint.get_waypoints_for_system("X1-NB8", [
-    st_waypoint.Trait("MARKETPLACE", "", ""),
+    // st_waypoint.Trait("MARKETPLACE", "", ""),
+    st_waypoint.Trait("CORRUPT", "", ""),
   ])
   |> io.debug
 }
