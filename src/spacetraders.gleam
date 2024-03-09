@@ -70,6 +70,8 @@ pub fn main() {
   // |> expect_200_body
   // |> io.debug
 
-  |> st_waypoint.get_waypoints_for_system("X1-NB8", [])
+  |> st_waypoint.get_waypoints_for_system("X1-NB8", [
+    st_waypoint.Trait("MARKETPLACE", "", ""),
+  ])
   |> io.debug
 }

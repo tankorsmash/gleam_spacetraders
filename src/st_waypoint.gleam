@@ -6,7 +6,7 @@ import gleam/option.{type Option}
 import gleam/result
 import gleam/list
 import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Raw, Url}
+import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 import st_response
@@ -206,6 +206,13 @@ pub fn get_waypoints_for_system(
     "systems/" <> system_name <> "/waypoints",
     expecting: Json(decoder),
     // expecting: Raw(dynamic.dynamic),
-    options: [],
+    options: [
+      Queries([
+        #(
+          "traits",
+          string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
+        ),
+      ]),
+    ],
   )
 }
