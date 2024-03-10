@@ -51,6 +51,7 @@ const contract_id: String = "clthywl03m46cs60cl8ezck89f"
 
 pub fn main() {
   dotenv.config()
+
   let client =
     create_client()
     // let my_waypoint =
