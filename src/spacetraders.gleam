@@ -13,6 +13,7 @@ import st_response.{type ApiResponse}
 import contract.{type Contract, decode_contract_response}
 import st_waypoint
 import st_agent
+import st_ship
 
 fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
@@ -50,11 +51,14 @@ const contract_id: String = "clthywl03m46cs60cl8ezck89f"
 
 pub fn main() {
   dotenv.config()
-  let client = create_client()
-  let my_waypoint =
-    client
-    |> st_agent.get_my_agent()
-    |> io.debug
+  let client =
+    create_client()
+    // let my_waypoint =
+    //   client
+    //   |> st_agent.get_my_agent()
+    //   |> io.debug
+    // -----
+    |> st_ship.get_my_ships()
   // |> contract.get_my_contracts
   // |> expect_200_body
   // |> extract_data

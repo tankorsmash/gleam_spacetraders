@@ -4,6 +4,7 @@ import gleam/erlang/os
 import gleam/string
 import gleam/list
 import gleam/result
+import gleam/function
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
@@ -409,7 +410,13 @@ pub fn decode_requirements() {
     Requirements,
     dynamic.field("power", dynamic.int),
     dynamic.field("crew", dynamic.int),
-    dynamic.field("slots", dynamic.int),
+    {
+      dynamic.field(named: "slots", of: {
+        fn(value) { result.try_recover(dynamic.int(value), fn(a) { Ok(0) }) }
+        //   use i <- result.unwrap(dynamic.int(value))
+        //   Ok(i)
+      })
+    },
   )
 }
 
@@ -509,4 +516,20 @@ pub fn decode_consumed() {
 
 pub fn decode_ships() {
   dynamic.list(decode_ship())
+}
+
+pub fn get_my_ships(client: falcon.Client) {
+  client
+  |> falcon.get(
+    "/my/ships/",
+    Json(st_response.decode_response(decode_ships())),
+    // Json(st_response.decode_response(dynamic.dynamic)),
+    // Raw(dynamic.dynamic),
+    [],
+  )
+  |> should.be_ok
+  |> core.extract_body
+  |> st_response.extract_data
+  //   |> decode_ships()
+  |> io.debug
 }
