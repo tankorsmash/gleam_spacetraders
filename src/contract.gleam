@@ -121,9 +121,7 @@ pub fn accept_contract(
 
   client
   |> falcon.post(
-    "/my/contracts/"
-    <> contract_id
-    <> "/accept",
+    "/my/contracts/" <> contract_id <> "/accept",
     expecting: Json(decoder),
     options: [],
     body: "",
