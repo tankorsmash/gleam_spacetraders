@@ -2,7 +2,7 @@ import gleam/io
 import dotenv
 import gleam/erlang/os
 import gleam/string
-import gleam/option
+import gleam/option.{type Option}
 import gleam/list
 import gleam/result
 import gleam/function
@@ -256,15 +256,15 @@ pub type Cooldown {
     ship_symbol: String,
     total_seconds: Int,
     remaining_seconds: Int,
-    expiration: String,
+    expiration: Option(String),
   )
 }
 
 pub type Module {
   Module(
     symbol: String,
-    capacity: Int,
-    range: Int,
+    capacity: Option(Int),
+    range: Option(Int),
     name: String,
     description: String,
     requirements: Requirements,
@@ -406,16 +406,27 @@ pub fn decode_frame() {
   )
 }
 
-pub fn decode_requirements() {
-  let option_field_with_default = fn(field_name) {
-    fn(value) {
-      result.map(
-        dynamic.optional_field(named: field_name, of: dynamic.int)(value),
-        fn(_) { 0 },
-      )
-    }
+pub fn optional_field_with_default(field_name, decoder, def) {
+  fn(value) {
+    value
+    |> dynamic.optional_field(field_name, of: decoder)
+    |> result.try(fn(errs) { Ok(def) })
   }
+}
 
+pub fn decode_requirements() {
+  //   |> 
+  //   |> Ok
+  //   |> result.map(fn(a) { a })
+  //   |> result.unwrap(option.Some(0))
+  //   use d <- decoder
+  //   result.map(decoder(value), fn(_) { 0 })
+  // fn(value) {
+  //   result.map(
+  //     dynamic.optional_field(named: field_name, of: dynamic.int)(value),
+  //     fn(_) { 0 },
+  //   )
+  // }
   dynamic.decode3(
     Requirements,
     // dynamic.field("power", dynamic.int),
@@ -437,9 +448,9 @@ pub fn decode_requirements() {
     //     )
     //   }
     // },
-    option_field_with_default("power"),
-    option_field_with_default("crew"),
-    option_field_with_default("slots"),
+    optional_field_with_default("power", dynamic.int, 0),
+    optional_field_with_default("crew", dynamic.int, 0),
+    optional_field_with_default("slots", dynamic.int, 0),
   )
 }
 
@@ -473,7 +484,7 @@ pub fn decode_cooldown() {
     dynamic.field("shipSymbol", dynamic.string),
     dynamic.field("totalSeconds", dynamic.int),
     dynamic.field("remainingSeconds", dynamic.int),
-    dynamic.field("expiration", dynamic.string),
+    dynamic.optional_field("expiration", dynamic.string),
   )
 }
 
@@ -481,8 +492,8 @@ pub fn decode_module() {
   dynamic.decode6(
     Module,
     dynamic.field("symbol", dynamic.string),
-    dynamic.field("capacity", dynamic.int),
-    dynamic.field("range", dynamic.int),
+    dynamic.optional_field("capacity", dynamic.int),
+    dynamic.optional_field("range", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
     dynamic.field("requirements", decode_requirements()),
@@ -496,7 +507,7 @@ pub fn decode_mount() {
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
     dynamic.field("strength", dynamic.int),
-    dynamic.field("deposits", dynamic.list(dynamic.string)),
+    optional_field_with_default("deposits", dynamic.list(dynamic.string), []),
     dynamic.field("requirements", decode_requirements()),
   )
 }
