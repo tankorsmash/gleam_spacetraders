@@ -42,3 +42,7 @@ pub fn decode_response(field_decoder) {
 pub fn decode_data(field_decoder) {
   dynamic.field("data", field_decoder)
 }
+
+pub fn extract_data(resp: ApiResponse(data)) -> data {
+  resp.data
+}

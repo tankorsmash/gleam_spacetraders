@@ -40,3 +40,11 @@ pub fn decode_agent() {
     dynamic.field("shipCount", dynamic.int),
   )
 }
+
+pub fn get_my_agent(client) {
+  client
+  |> falcon.get("/my/agent", Json(st_response.decode_data(decode_agent())), [])
+  |> should.be_ok
+  |> core.extract_body
+  // |> st_response.extract_data
+}
