@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%
 
 start(normal, []) ->
-    m8ball_sup:start_link().
+    m8ball_sup:start_link();
 
 start({takeover, _OtherNode}, []) ->
     m8ball_sup:start_link().
