@@ -15,7 +15,7 @@ start(normal, []) ->
     m8ball_sup:start_link();
 
 start({takeover, _OtherNode}, []) ->
-    io:format("takover starting~n"),
+    io:format("formal takeover starting~n"),
     m8ball_sup:start_link().
 
 
