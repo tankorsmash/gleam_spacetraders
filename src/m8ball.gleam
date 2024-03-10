@@ -68,13 +68,17 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        children
-        |> add(build_child)
-        |> add(build_child)
-        |> add(build_child)
+        list.repeat([], 100)
+        |> list.fold(from: children, with: fn(children, _) {
+          add(children, build_child)
+        })
       },
     ),
   )
+  // children
+  // |> add(build_child)
+  // |> add(build_child)
+  // |> add(build_child)
   |> should.be_ok
 
   // Assert children have started
