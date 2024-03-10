@@ -30,7 +30,7 @@ type MySubject =
   process.Subject(MyMsg)
 
 type MyMsg =
-  #(Int, process.Pid)
+  #(String, process.Pid)
 
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
@@ -40,7 +40,7 @@ pub fn supervisor_test() {
       init: fn() {
         let msg = #(name, process.self())
         process.send(subject, msg)
-        io.println("Child started: " <> int.to_string(name))
+        io.println("Child started: " <> name)
         actor.Ready(name, process.new_selector())
       },
       init_timeout: 10,
@@ -53,13 +53,18 @@ pub fn supervisor_test() {
   let child = worker(fn(name) { actor.start_spec(build_spec(name)) })
 
   // Each child returns the next name, which is their name + 1
-  let build_child =
+  let build_child: supervisor.ChildSpec(a, String, String) =
     child
-    |> returning(fn(name, _subject) { name + 1 })
+    |> returning(fn(name: String, _subject) -> String {
+      int.parse(name)
+      |> result.unwrap(1000)
+      |> fn(a) { a + 1 }
+      |> int.to_string
+    })
 
   supervisor.start_spec(
     supervisor.Spec(
-      argument: 1,
+      argument: "1",
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
@@ -73,23 +78,23 @@ pub fn supervisor_test() {
   |> should.be_ok
 
   // Assert children have started
-  let assert Ok(#(1, p)) = process.receive(subject, 10)
-  let assert Ok(#(2, _)) = process.receive(subject, 10)
-  let assert Ok(#(3, _)) = process.receive(subject, 10)
+  let assert Ok(#("1", p)) = process.receive(subject, 10)
+  let assert Ok(#("2", _)) = process.receive(subject, 10)
+  let assert Ok(#("3", _)) = process.receive(subject, 10)
   let assert Error(Nil) = process.receive(subject, 10)
   io.println("restarting")
   // Kill first child an assert they all restart
   process.kill(p)
-  let assert Ok(#(1, p1)) = process.receive(subject, 10)
-  let assert Ok(#(2, p2)) = process.receive(subject, 10)
-  let assert Ok(#(3, _)) = process.receive(subject, 10)
+  let assert Ok(#("1", p1)) = process.receive(subject, 10)
+  let assert Ok(#("2", p2)) = process.receive(subject, 10)
+  let assert Ok(#("3", _)) = process.receive(subject, 10)
   let assert Error(Nil) = process.receive(subject, 10)
 
   io.println("killing")
   // Kill second child an assert the following children restart
   process.kill(p2)
-  let assert Ok(#(2, _)) = process.receive(subject, 10)
-  let assert Ok(#(3, _)) = process.receive(subject, 10)
+  let assert Ok(#("2", _)) = process.receive(subject, 10)
+  let assert Ok(#("3", _)) = process.receive(subject, 10)
   let assert Error(Nil) = process.receive(subject, 10)
   let assert True = process.is_alive(p1)
 }
