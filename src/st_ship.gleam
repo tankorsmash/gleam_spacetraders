@@ -2,6 +2,7 @@ import gleam/io
 import dotenv
 import gleam/erlang/os
 import gleam/string
+import gleam/option
 import gleam/list
 import gleam/result
 import gleam/function
@@ -406,17 +407,39 @@ pub fn decode_frame() {
 }
 
 pub fn decode_requirements() {
+  let option_field_with_default = fn(field_name) {
+    fn(value) {
+      result.map(
+        dynamic.optional_field(named: field_name, of: dynamic.int)(value),
+        fn(_) { 0 },
+      )
+    }
+  }
+
   dynamic.decode3(
     Requirements,
-    dynamic.field("power", dynamic.int),
-    dynamic.field("crew", dynamic.int),
-    {
-      dynamic.field(named: "slots", of: {
-        fn(value) { result.try_recover(dynamic.int(value), fn(a) { Ok(0) }) }
-        //   use i <- result.unwrap(dynamic.int(value))
-        //   Ok(i)
-      })
-    },
+    // dynamic.field("power", dynamic.int),
+    // dynamic.field("crew", dynamic.int),
+    // {
+    //   dynamic.field(named: "slots", of: {
+    //     fn(value) { result.try_recover(dynamic.int(value), 
+    //     fn(a) { Ok(0) }) }
+    //     //   use i <- result.unwrap(dynamic.int(value))
+    //     //   Ok(i)
+    //   })
+    // },
+    // ----
+    // {
+    //   fn(value) {
+    //     result.map(
+    //       dynamic.optional_field(named: "slots", of: dynamic.int)(value),
+    //       fn(_) { 0 },
+    //     )
+    //   }
+    // },
+    option_field_with_default("power"),
+    option_field_with_default("crew"),
+    option_field_with_default("slots"),
   )
 }
 
