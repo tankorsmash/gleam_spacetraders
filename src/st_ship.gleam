@@ -3,6 +3,7 @@ import dotenv
 import gleam/erlang/os
 import gleam/string
 import gleam/list
+import gleam/result
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
@@ -296,21 +297,33 @@ pub type Consumed {
 }
 
 pub fn decode_ship() {
-  dynamic.decode12(
-    Ship,
-    dynamic.field("symbol", dynamic.string),
-    dynamic.field("registration", decode_registration),
-    dynamic.field("nav", decode_nav),
-    dynamic.field("crew", decode_crew),
-    dynamic.field("frame", decode_frame),
-    dynamic.field("reactor", decode_reactor),
-    dynamic.field("engine", decode_engine),
-    dynamic.field("cooldown", decode_cooldown),
-    dynamic.field("modules", dynamic.list(decode_module)),
-    dynamic.field("mounts", dynamic.list(decode_mount)),
-    dynamic.field("cargo", decode_cargo),
-    dynamic.field("fuel", decode_fuel),
-  )
+  fn(value) {
+    use #(s, r, n, c) <- result.try(dynamic.decode4(
+      fn(s, r, n, c) { #(s, r, n, c) },
+      dynamic.field("symbol", dynamic.string),
+      dynamic.field("registration", decode_registration()),
+      dynamic.field("nav", decode_nav()),
+      dynamic.field("crew", decode_crew()),
+    )(value))
+
+    dynamic.decode8(
+      fn(f, re, e, co, m, mo, ca, fu) {
+        Ship(s, r, n, c, f, re, e, co, m, mo, ca, fu)
+      },
+      //   dynamic.field("symbol", dynamic.string),
+      //   dynamic.field("registration", decode_registration),
+      //   dynamic.field("nav", decode_nav),
+      //   dynamic.field("crew", decode_crew),
+      dynamic.field("frame", decode_frame()),
+      dynamic.field("reactor", decode_reactor()),
+      dynamic.field("engine", decode_engine()),
+      dynamic.field("cooldown", decode_cooldown()),
+      dynamic.field("modules", dynamic.list(decode_module())),
+      dynamic.field("mounts", dynamic.list(decode_mount())),
+      dynamic.field("cargo", decode_cargo()),
+      dynamic.field("fuel", decode_fuel()),
+    )(value)
+  }
 }
 
 pub fn decode_registration() {
@@ -495,5 +508,5 @@ pub fn decode_consumed() {
 }
 
 pub fn decode_ships() {
-  dynamic.decode1(dynamic.list(decode_ship))
+  dynamic.list(decode_ship())
 }
