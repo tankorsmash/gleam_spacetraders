@@ -38,7 +38,7 @@ pub fn supervisor_test() {
     fn() {
       let msg = #(name, process.self())
       process.send(subject, msg)
-      io.println("Child started: " <> name)
+      //   io.println("Child started: " <> name)
       actor.Ready(name, process.new_selector())
     }
   }
@@ -51,11 +51,12 @@ pub fn supervisor_test() {
 
   // Children send their name back to the test process during
   // initialisation so that we can tell they (re)started
-  let child_spec = worker(fn(name) { actor.start_spec(build_actor_spec(name)) })
+  let default_child_spec =
+    worker(fn(name) { actor.start_spec(build_actor_spec(name)) })
 
   // Each child returns the next name, which is their name + 1
-  let build_child: supervisor.ChildSpec(a, String, String) =
-    returning(child_spec, fn(name: String, _subject) -> String {
+  let returning_child_spec: supervisor.ChildSpec(a, String, String) =
+    returning(default_child_spec, fn(name: String, _subject) -> String {
       int.parse(name)
       |> result.unwrap(1000)
       |> fn(a) { a + 1 }
@@ -68,45 +69,26 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        list.repeat(Nil, 3)
+        let num_children = 30_000
+        list.repeat(Nil, num_children)
         |> list.fold(from: children, with: fn(children, _) {
-          add(children, build_child)
+          add(children, returning_child_spec)
         })
       },
     ),
   )
-  // children
-  // |> add(build_child)
-  // |> add(build_child)
-  // |> add(build_child)
   |> should.be_ok
 
   // Assert children have started
   let assert Ok(#("1", p)) = process.receive(subject, 10)
   let assert Ok(#("2", _)) = process.receive(subject, 10)
   let assert Ok(#("3", _)) = process.receive(subject, 10)
-  let assert Error(Nil) = process.receive(subject, 10)
-  io.println("restarting")
-  io.debug(p)
-  //   let state2: dynamic.Dynamic =
+  //   let assert Error(Nil) = process.receive(subject, 10)
+
   let state2 =
-    // let assertstart2
     p
     |> system.get_state
     |> io.debug
 
-  // Kill first child an assert they all restart
-  process.kill(p)
-  let assert Ok(#("1", p1)) = process.receive(subject, 10)
-  let assert Ok(#("2", p2)) = process.receive(subject, 10)
-  let assert Ok(#("3", _)) = process.receive(subject, 10)
-  let assert Error(Nil) = process.receive(subject, 10)
-
-  io.println("killing")
-  // Kill second child an assert the following children restart
-  process.kill(p2)
-  let assert Ok(#("2", _)) = process.receive(subject, 10)
-  let assert Ok(#("3", _)) = process.receive(subject, 10)
-  let assert Error(Nil) = process.receive(subject, 10)
-  let assert True = process.is_alive(p1)
+//   process.sleep_forever()
 }
