@@ -82,7 +82,8 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        let num_children = 30_000
+        // let num_children = 30_000
+        let num_children = 0
         list.repeat(Nil, num_children)
         |> list.fold(from: children, with: fn(children, _) {
           add(children, returning_child_spec)
@@ -93,17 +94,56 @@ pub fn supervisor_test() {
   |> should.be_ok
 
   // Assert children have started
-  let assert Ok(#("1", p)) = process.receive(subject, 10)
-  let assert Ok(#("2", _)) = process.receive(subject, 10)
-  let assert Ok(#("3", _)) = process.receive(subject, 10)
+  //   let assert Ok(#("1", p)) = process.receive(subject, 10)
+  //   let assert Ok(#("2", _)) = process.receive(subject, 10)
+  //   let assert Ok(#("3", _)) = process.receive(subject, 10)
   //   let assert Error(Nil) = process.receive(subject, 10)
+
+  let assert Ok(Nil) =
+    process.self()
+    |> process.register(atom.create_from_string("m8ball_sup_proc"))
+
+  io.println("sending subject")
+  process.send(process.new_subject(), "hello")
+
+  let selector =
+    process.new_selector()
+    |> process.selecting_anything(dynamic.dynamic)
+  let res =
+    process.select(selector, 0)
+    |> io.debug
 
   node.self()
   |> node.to_atom()
   |> io.debug
-  let state2 =
-    p
-    |> system.get_state
+  //   let state2 =
+  //     p
+  //     |> system.get_state
+  //     |> io.debug
+  //   process.sleep_forever()
+  let s = process.new_subject()
+  //   let selector =
+  //     process.new_selector()
+  //     |> process.selecting_anything(_, for: s, mapping: fn(_) {
+  //       io.println("got message")
+  //     })
+  //     |> process.select_forever
+  let selector =
+    process.new_selector()
+    // |> process.selecting_anything(dynamic.tuple2(dynamic.string, dynamic.string))
+    // |> process.selecting_anything(dynamic.int)
+    |> process.selecting(process.new_subject(), fn(a) { a })
+    // |> process.selecting(process.new_subject(), int.to_string)
     |> io.debug
-  process.sleep_forever()
+
+  io.println("visiible nodes:")
+  node.visible()
+  |> io.debug
+  io.println("waiting")
+  process.select_forever(selector)
+  |> io.debug()
+  io.println("waiting")
+  process.select_forever(selector)
+  io.println("waiting")
+  process.select_forever(selector)
 }

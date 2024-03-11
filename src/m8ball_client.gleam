@@ -1,6 +1,6 @@
 import gleam/io
 // import gleam/erlang/os
-// import gleam/string
+import gleam/string
 import gleam/option.{type Option}
 import gleam/result
 import gleam/list
@@ -29,6 +29,24 @@ pub fn main() {
 
   let sup_name_atom = atom.create_from_string("m8ball_sup")
   io.println("about to connect")
-  node.connect(atom.create_from_string("m8ball_sup@Josh-Desktop-V2"))
-  io.println("hiya")
+  let assert Ok(sup_node) =
+    node.connect(atom.create_from_string("m8ball_sup@Josh-Desktop-V2"))
+  process.new_selector()
+  |> io.debug
+
+  node.visible()
+  |> io.debug
+
+  node.send(sup_node, atom.create_from_string("m8ball_sup_proc"), 123)
+  io.println("sent message to sup_node proc")
+
+  process.call(
+    process.new_subject(),
+    fn(subject) {
+      io.println("my_message2:" <> string.inspect(subject))
+      process.send(subject, 999)
+    },
+    1_000_000,
+  )
+  io.println("sent processe message to subject")
 }
