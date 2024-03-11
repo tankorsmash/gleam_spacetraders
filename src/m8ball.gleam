@@ -34,27 +34,28 @@ type MyMsg =
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
 
-  let build_spec = fn(name) {
-    actor.Spec(
-      init: fn() {
-        let msg = #(name, process.self())
-        process.send(subject, msg)
-        io.println("Child started: " <> name)
-        actor.Ready(name, process.new_selector())
-      },
-      init_timeout: 10,
-      loop: fn(_msg, state) { actor.continue(state) },
-    )
+  let actor_init = fn(name) {
+    fn() {
+      let msg = #(name, process.self())
+      process.send(subject, msg)
+      io.println("Child started: " <> name)
+      actor.Ready(name, process.new_selector())
+    }
+  }
+
+  let actor_loop = fn(_msg, state) { actor.continue(state) }
+
+  let build_actor_spec = fn(name) {
+    actor.Spec(init: actor_init(name), init_timeout: 10, loop: actor_loop)
   }
 
   // Children send their name back to the test process during
   // initialisation so that we can tell they (re)started
-  let child = worker(fn(name) { actor.start_spec(build_spec(name)) })
+  let child_spec = worker(fn(name) { actor.start_spec(build_actor_spec(name)) })
 
   // Each child returns the next name, which is their name + 1
   let build_child: supervisor.ChildSpec(a, String, String) =
-    child
-    |> returning(fn(name: String, _subject) -> String {
+    returning(child_spec, fn(name: String, _subject) -> String {
       int.parse(name)
       |> result.unwrap(1000)
       |> fn(a) { a + 1 }
