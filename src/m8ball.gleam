@@ -1,7 +1,6 @@
 import gleam/io
-import dotenv
-import gleam/erlang/os
-import gleam/string
+// import gleam/erlang/os
+// import gleam/string
 import gleam/option.{type Option}
 import gleam/result
 import gleam/list
@@ -10,10 +9,10 @@ import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
-import st_response
 import gleam/otp/supervisor.{add, returning, worker}
 import gleam/otp/actor
-import gleam/otp/task
+// import gleam/otp/task
+import gleam/otp/system
 import gleam/erlang/process
 
 // [{kernel,
@@ -68,7 +67,7 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        list.repeat([], 100)
+        list.repeat(Nil, 3)
         |> list.fold(from: children, with: fn(children, _) {
           add(children, build_child)
         })
@@ -87,6 +86,14 @@ pub fn supervisor_test() {
   let assert Ok(#("3", _)) = process.receive(subject, 10)
   let assert Error(Nil) = process.receive(subject, 10)
   io.println("restarting")
+  io.debug(p)
+  //   let state2: dynamic.Dynamic =
+  let state2 =
+    // let assertstart2
+    p
+    |> system.get_state
+    |> io.debug
+
   // Kill first child an assert they all restart
   process.kill(p)
   let assert Ok(#("1", p1)) = process.receive(subject, 10)
