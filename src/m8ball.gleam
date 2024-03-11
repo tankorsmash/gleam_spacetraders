@@ -130,8 +130,8 @@ pub fn supervisor_test() {
   //     |> process.select_forever
   let selector =
     process.new_selector()
-    |> process.selecting_anything(dynamic.tuple2(dynamic.string, dynamic.string))
-    // |> process.selecting_anything(dynamic.int)
+    // |> process.selecting_anything(dynamic.tuple2(dynamic.string, dynamic.string))
+    |> process.selecting_anything(dynamic.int)
     // |> process.selecting(process.new_subject(), fn(a) { io.debug(a) })
     // |> process.selecting(process.new_subject(), int.to_string)
     |> io.debug
