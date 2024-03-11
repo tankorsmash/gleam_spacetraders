@@ -14,6 +14,8 @@ import gleam/otp/actor
 // import gleam/otp/task
 import gleam/otp/system
 import gleam/erlang/process
+import gleam/erlang/node
+import gleam/erlang/atom.{type Atom}
 
 // [{kernel,
 // 	[{distributed, [{m8ball,
@@ -25,6 +27,11 @@ import gleam/erlang/process
 
 // const config_a: supervisor.Spec(arg,return) = supervisor.Spec(arg, max_frequency: 30000, frequency_period:5000, init: fn(
 
+@external(erlang, "net_kernel", "start")
+pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
+
+//   options: Atom,
+
 type MySubject =
   process.Subject(MyMsg)
 
@@ -33,6 +40,12 @@ type MyMsg =
 
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
+
+  let name_atom = atom.create_from_string("m8ball_sup")
+  // |> result.unwrap(panic("Failed to start net_kernel ketchup"))
+  let shortnames_atom = atom.create_from_string("shortnames")
+  // |> result.unwrap(funpanic("Failed to start net_kernel shortnames"))
+  let short_name = net_kernel_start_shortname([name_atom, shortnames_atom])
 
   let actor_init = fn(name) {
     fn() {
@@ -85,10 +98,12 @@ pub fn supervisor_test() {
   let assert Ok(#("3", _)) = process.receive(subject, 10)
   //   let assert Error(Nil) = process.receive(subject, 10)
 
+  node.self()
+  |> node.to_atom()
+  |> io.debug
   let state2 =
     p
     |> system.get_state
     |> io.debug
-
-//   process.sleep_forever()
+  //   process.sleep_forever()
 }
