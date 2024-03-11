@@ -105,5 +105,5 @@ pub fn supervisor_test() {
     p
     |> system.get_state
     |> io.debug
-  //   process.sleep_forever()
+  process.sleep_forever()
 }
