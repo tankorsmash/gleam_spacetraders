@@ -172,18 +172,33 @@ pub fn supervisor_test() {
       // let assert Ok(qwe) = atom.from_dynamic(a)
       io.debug(val)
       io.println("after2")
-      dynamic.decode1(
-        fn(atom_int: #(Atom, Int)) {
-          let atom = atom_int.0
-          io.debug(atom == atom.create_from_string("SharedData"))
-          let val = atom_int.1
-          io.debug(atom)
-          io.debug(atom.to_string(atom))
-          m8ball_shared.SharedData(val)
-        },
-        dynamic.tuple2(atom.from_dynamic, dynamic.int),
-      )(val)
+
+      let decoded = dynamic.tuple2(atom.from_dynamic, dynamic.int)(val)
+      use decoded_res <- result.try(decoded)
+
+      let str_atom = atom.to_string(decoded_res.0)
+      case #(str_atom, decoded_res.1) {
+        #("shared_data", int_val) -> {
+          Ok(m8ball_shared.SharedData(int_val))
+        }
+        otherwise -> {
+          Error([
+            dynamic.DecodeError("'shared_data'", str_atom, ["top, i guess"]),
+          ])
+        }
+      }
     })
+    // dynamic.decode1(
+    //   fn(atom_int: #(Atom, Int)) {
+    //     let atom = atom_int.0
+    //     io.debug(atom == atom.create_from_string("SharedData"))
+    //     let val = atom_int.1
+    //     io.debug(atom)
+    //     io.debug(atom.to_string(atom))
+    //     m8ball_shared.SharedData(val)
+    //   },
+    //   dynamic.tuple2(atom.from_dynamic, dynamic.int),
+    // )(val)
     // use d <- process.selecting_anything(dynamic.int)
     // d
     // |> process.map_selector(m8ball_shared.SharedData)
