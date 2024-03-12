@@ -49,21 +49,21 @@ pub fn main() {
   |> io.debug
 
   node.send(sup_node, atom.create_from_string(m8ball_shared.proc_name_sup), 123)
-  io.println("sent message to sup_node proc")
+  io.println("sent message to main proc")
 
   node.send(
     sup_node,
     atom.create_from_string(m8ball_shared.proc_name_conn),
     456,
   )
-
-  process.call(
-    process.new_subject(),
-    fn(subject) {
-      io.println("my_message2:" <> string.inspect(subject))
-      process.send(subject, 999)
-    },
-    1_000_000,
-  )
-  io.println("sent processe message to subject")
+  io.println("sent message to conn proc")
+  // process.call(
+  //   process.new_subject(),
+  //   fn(subject) {
+  //     io.println("my_message2:" <> string.inspect(subject))
+  //     process.send(subject, 999)
+  //   },
+  //   1_000_000,
+  // )
+  // io.println("sent processe message to subject")
 }

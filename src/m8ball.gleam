@@ -47,7 +47,7 @@ pub fn supervisor_test() {
 
   let assert Ok(connection_actor_subj) =
     actor.start(0, fn(msg, state) {
-      io.debug("got message on connection_actor" <> msg)
+      io.debug("got message on connection_actor" <> int.to_string(msg))
 
       actor.continue(state)
     })
