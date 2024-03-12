@@ -49,36 +49,18 @@ pub fn main() {
   |> io.debug
 
   let my_subject = process.new_subject()
-  // node.send(sup_node, atom.create_from_string(m8ball_shared.proc_name_sup), #(123, process.process.new_subject()))
   node.send(
     sup_node,
     atom.create_from_string(m8ball_shared.proc_name_sup),
-    // m8ball_shared.SharedData(123),
     m8ball_shared.SharedData(my_subject),
   )
-  // Temp(123),
-  // 123,
+
   io.println("sent message to main proc")
   io.println("waiting to get subject back")
 
   let assert Ok(node_sub) =
     process.receive(my_subject, 1_000_000)
     |> io.debug
-  // node.send(
-  //   sup_node,
-  //   atom.create_from_string(m8ball_shared.proc_name_conn),
-  //   456,
-  // )
-  // io.println("sent message to conn proc")
-  // process.call(
-  //   process.new_subject(),
-  //   fn(subject) {
-  //     io.println("my_message2:" <> string.inspect(subject))
-  //     process.send(subject, 999)
-  //   },
-  //   1_000_000,
-  // )
-  // io.println("sent processe message to subject")
 }
 
 type Temp {

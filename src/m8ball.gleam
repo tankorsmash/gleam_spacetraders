@@ -135,41 +135,10 @@ pub fn supervisor_test() {
     process.self()
     |> process.register(atom.create_from_string(m8ball_shared.proc_name_sup))
 
-  // io.println("sending subject")
-  // process.send(process.new_subject(), "hello")
-
-  // let s = process.new_subject()
-  //   let selector =
-  //     process.new_selector()
-  //     |> process.selecting_anything(_, for: s, mapping: fn(_) {
-  //       io.println("got message")
-  //     })
-  //     |> process.select_forever
-  // let selector: Selector(SharedData) =
   let selector =
     process.new_selector()
-    // |> process.selecting_anything(dynamic.tuple2(dynamic.string, dynamic.string))
-    // |> process.selecting(s, dynamic.int)
-    // |> process.selecting(s, dynamic.int)
-    // |> process.selecting_record2(m8ball_shared.SharedData, dynamic.int)
-    // |> process.selecting_anything(dynamic.int)
-    // |> process.selecting_anything(fn(a) { a })
-    // |> process.selecting(process.new_subject(), fn(a) { io.debug(a) })
-    // |> process.selecting_anything(fn(a) { io.debug(a) })
-    // |> process.selecting_anything(dynamic.decode1(
-    //   m8ball_shared.SharedData,
-    //   dynamic.int,
-    // ))
-    // |> process.selecting_anything(fn(a) {
-    //   io.println("trying")
-    //   // let assert Ok(qwe) = atom.from_dynamic(a)
-    //   io.debug(a)
-    //   io.println("after")
-    //   dynamic.decode1(m8ball_shared.SharedData, dynamic.int)(a)
-    // })
     |> process.selecting_anything(fn(val) {
       io.println("trying2")
-      // let assert Ok(qwe) = atom.from_dynamic(a)
       io.debug(val)
       io.println("after2")
 
@@ -193,25 +162,6 @@ pub fn supervisor_test() {
         }
       }
     })
-    // dynamic.decode1(
-    //   fn(atom_int: #(Atom, Int)) {
-    //     let atom = atom_int.0
-    //     io.debug(atom == atom.create_from_string("SharedData"))
-    //     let val = atom_int.1
-    //     io.debug(atom)
-    //     io.debug(atom.to_string(atom))
-    //     m8ball_shared.SharedData(val)
-    //   },
-    //   dynamic.tuple2(atom.from_dynamic, dynamic.int),
-    // )(val)
-    // use d <- process.selecting_anything(dynamic.int)
-    // d
-    // |> process.map_selector(m8ball_shared.SharedData)
-    // }
-    // use val: Int <- dynamic.int
-    // m8ball_shared.SharedData(val)
-    // })
-    // |> process.selecting(process.new_subject(), int.to_string)
     |> io.debug
 
   io.println("visible nodes:")
