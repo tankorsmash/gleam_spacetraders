@@ -42,14 +42,25 @@ type MyMsg =
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
 
-  let short_name = name_node_short_name("m8ball_sup")
+  let short_name = name_node_short_name(m8ball_shared.node_name_sup)
+  let proc_name_conn = m8ball_shared.proc_name_conn
 
-  let connection_actor =
+  let assert Ok(connection_actor_subj) =
     actor.start(0, fn(msg, state) {
       io.debug("got message on connection_actor" <> msg)
-      let short_name = name_node_short_name("m8ball_connection")
+
       actor.continue(state)
     })
+
+  let assert Ok(connection_pid) =
+    actor.to_erlang_start_result(Ok(connection_actor_subj))
+
+  io.println("conn pid")
+  io.debug(connection_pid)
+  let assert Ok(_) =
+    process.register(connection_pid, atom.create_from_string(proc_name_conn))
+
+  // system.get_state(connection_actor_sub)
 
   let actor_init = fn(name) {
     fn() {
@@ -105,7 +116,7 @@ pub fn supervisor_test() {
 
   let assert Ok(Nil) =
     process.self()
-    |> process.register(atom.create_from_string("m8ball_sup_proc"))
+    |> process.register(atom.create_from_string(m8ball_shared.proc_name_sup))
 
   io.println("sending subject")
   process.send(process.new_subject(), "hello")

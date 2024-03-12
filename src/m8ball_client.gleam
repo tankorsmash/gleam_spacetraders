@@ -16,15 +16,26 @@ import gleam/otp/system
 import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
-import m8ball_shared.{type SharedSubject, name_node_short_name}
+import m8ball_shared.{type SharedSubject, create_full_name, name_node_short_name}
 
 pub fn main() {
   let my_short_name = name_node_short_name("m8ball_client")
 
-  let sup_name_atom = atom.create_from_string("m8ball_sup")
+  let host = "Josh-Desktop-V2"
+
+  let node_name_sup = atom.create_from_string(m8ball_shared.node_name_sup)
+  let proc_name_connection =
+    atom.create_from_string(m8ball_shared.proc_name_conn)
+
+  let name_atom_sup =
+    m8ball_shared.create_full_name(
+      atom.to_string(node_name_sup),
+      "Josh-Desktop-V2",
+    )
+    |> atom.create_from_string
+
   io.println("about to connect")
-  let assert Ok(sup_node) =
-    node.connect(atom.create_from_string("m8ball_sup@Josh-Desktop-V2"))
+  let assert Ok(sup_node) = node.connect(name_atom_sup)
 
   let int_subject = process.new_subject()
   let float_subject = process.new_subject()
@@ -33,7 +44,7 @@ pub fn main() {
   node.visible()
   |> io.debug
 
-  node.send(sup_node, atom.create_from_string("m8ball_sup_proc"), 123)
+  node.send(sup_node, atom.create_from_string(m8ball_shared.proc_name_sup), 123)
   io.println("sent message to sup_node proc")
 
   process.call(

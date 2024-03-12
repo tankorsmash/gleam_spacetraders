@@ -20,6 +20,16 @@ import gleam/erlang/atom.{type Atom}
 pub type SharedSubject =
   process.Subject(String)
 
+pub const node_name_sup = "m8ball_sup"
+
+pub const proc_name_conn = "m8ball_connection"
+
+pub const proc_name_sup = "m8ball_supervisor"
+
+pub fn create_full_name(name: String, host: String) -> String {
+  name <> "@" <> host
+}
+
 pub fn name_node_short_name(node_name: String) -> Result(Atom, Nil) {
   let name_atom = atom.create_from_string(node_name)
   let shortnames_atom = atom.create_from_string("shortnames")
