@@ -16,7 +16,7 @@ import gleam/otp/system
 import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
-import m8ball_shared.{type SharedSubject, set_name_node_short_name}
+import m8ball_shared.{type SharedData, set_name_node_short_name}
 
 // [{kernel,
 // 	[{distributed, [{m8ball,
@@ -79,8 +79,8 @@ pub fn supervisor_test() {
 
   let actor_init = fn(name) {
     fn() {
-      let msg = #(name, process.self())
-      process.send(subject, msg)
+      // let msg = #(name, process.self())
+      // process.send(subject, msg)
       //   io.println("Child started: " <> name)
       actor.Ready(name, process.new_selector())
     }
@@ -123,63 +123,88 @@ pub fn supervisor_test() {
   )
   |> should.be_ok
 
+  process.receive(subject, 10)
   // Assert children have started
-  //   let assert Ok(#("1", p)) = process.receive(subject, 10)
+  // let assert Ok(#("1", p)) = process.receive(subject, 10)
   //   let assert Ok(#("2", _)) = process.receive(subject, 10)
   //   let assert Ok(#("3", _)) = process.receive(subject, 10)
   //   let assert Error(Nil) = process.receive(subject, 10)
 
+  // register self's proc name
   let assert Ok(Nil) =
     process.self()
     |> process.register(atom.create_from_string(m8ball_shared.proc_name_sup))
 
-  io.println("sending subject")
-  process.send(process.new_subject(), "hello")
+  // io.println("sending subject")
+  // process.send(process.new_subject(), "hello")
 
-  let selector =
-    process.new_selector()
-    |> process.selecting_anything(dynamic.dynamic)
-  let res =
-    process.select(selector, 0)
-    |> io.debug
-
-  node.self()
-  |> node.to_atom()
-  |> io.debug
-  //   let state2 =
-  //     p
-  //     |> system.get_state
-  //     |> io.debug
-  //   process.sleep_forever()
-  let s = process.new_subject()
+  // let s = process.new_subject()
   //   let selector =
   //     process.new_selector()
   //     |> process.selecting_anything(_, for: s, mapping: fn(_) {
   //       io.println("got message")
   //     })
   //     |> process.select_forever
+  // let selector: Selector(SharedData) =
   let selector =
     process.new_selector()
     // |> process.selecting_anything(dynamic.tuple2(dynamic.string, dynamic.string))
     // |> process.selecting(s, dynamic.int)
     // |> process.selecting(s, dynamic.int)
-    |> process.selecting_anything(dynamic.int)
+    // |> process.selecting_record2(m8ball_shared.SharedData, dynamic.int)
+    // |> process.selecting_anything(dynamic.int)
     // |> process.selecting_anything(fn(a) { a })
     // |> process.selecting(process.new_subject(), fn(a) { io.debug(a) })
+    // |> process.selecting_anything(fn(a) { io.debug(a) })
+    // |> process.selecting_anything(dynamic.decode1(
+    //   m8ball_shared.SharedData,
+    //   dynamic.int,
+    // ))
+    // |> process.selecting_anything(fn(a) {
+    //   io.println("trying")
+    //   // let assert Ok(qwe) = atom.from_dynamic(a)
+    //   io.debug(a)
+    //   io.println("after")
+    //   dynamic.decode1(m8ball_shared.SharedData, dynamic.int)(a)
+    // })
+    |> process.selecting_anything(fn(val) {
+      io.println("trying2")
+      // let assert Ok(qwe) = atom.from_dynamic(a)
+      io.debug(val)
+      io.println("after2")
+      dynamic.decode1(
+        fn(a: #(Atom, Int)) {
+          io.debug(a.0)
+          m8ball_shared.SharedData(a.1)
+        },
+        dynamic.tuple2(atom.from_dynamic, dynamic.int),
+      )(val)
+    })
+    // use d <- process.selecting_anything(dynamic.int)
+    // d
+    // |> process.map_selector(m8ball_shared.SharedData)
+    // }
+    // use val: Int <- dynamic.int
+    // m8ball_shared.SharedData(val)
+    // })
     // |> process.selecting(process.new_subject(), int.to_string)
     |> io.debug
 
-  io.println("visiible nodes:")
+  io.println("visible nodes:")
   node.visible()
   |> io.debug
 
-  process.sleep_forever()
+  // process.sleep_forever()
 
   io.println("waiting")
   process.select_forever(selector)
   |> io.debug()
-  io.println("waiting")
+
+  io.println("waiting 2nd")
   process.select_forever(selector)
-  io.println("waiting")
+  |> io.debug()
+
+  io.println("waiting 3rd")
   process.select_forever(selector)
+  |> io.debug()
 }

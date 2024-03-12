@@ -17,7 +17,7 @@ import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
 import m8ball_shared.{
-  type SharedSubject, create_full_name, set_name_node_short_name,
+  type SharedData, create_full_name, set_name_node_short_name,
 }
 
 fn connect_to_main_node() {
@@ -48,15 +48,20 @@ pub fn main() {
   node.visible()
   |> io.debug
 
-  node.send(sup_node, atom.create_from_string(m8ball_shared.proc_name_sup), 123)
-  io.println("sent message to main proc")
-
+  // node.send(sup_node, atom.create_from_string(m8ball_shared.proc_name_sup), #(123, process.process.new_subject()))
   node.send(
     sup_node,
-    atom.create_from_string(m8ball_shared.proc_name_conn),
-    456,
+    atom.create_from_string(m8ball_shared.proc_name_sup),
+    m8ball_shared.SharedData(123),
   )
-  io.println("sent message to conn proc")
+  // 123,
+  io.println("sent message to main proc")
+  // node.send(
+  //   sup_node,
+  //   atom.create_from_string(m8ball_shared.proc_name_conn),
+  //   456,
+  // )
+  // io.println("sent message to conn proc")
   // process.call(
   //   process.new_subject(),
   //   fn(subject) {
