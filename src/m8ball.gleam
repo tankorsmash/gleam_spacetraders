@@ -221,12 +221,12 @@ pub fn supervisor_test() {
   // process.sleep_forever()
 
   io.println("waiting")
-  let assert Ok(first_msg) =
+  let assert Ok(m8ball_shared.SharedData(first_msg)) =
     process.select_forever(selector)
     |> io.debug()
 
   io.println("specifically waiting to send back")
-  node.send(first_msg, "star")
+  process.send(first_msg, "star")
 
   io.println("waiting 2nd")
   process.select_forever(selector)
