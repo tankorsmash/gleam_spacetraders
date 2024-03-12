@@ -13,10 +13,13 @@ import gleam/otp/supervisor.{add, returning, worker}
 import gleam/otp/actor
 // import gleam/otp/task
 import gleam/otp/system
-import gleam/erlang/process
+import gleam/erlang/process.{type Subject}
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
-import m8ball_shared.{type SharedData, set_name_node_short_name}
+import m8ball_shared.{
+  type ClientData, type ConnectionMsg, type MainData, type SharedData,
+  type ToBackend, type ToFrontend, create_full_name, set_name_node_short_name,
+}
 
 // [{kernel,
 // 	[{distributed, [{m8ball,
@@ -45,28 +48,37 @@ pub fn supervisor_test() {
   let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
+  let handle_to_backend = fn(msg: ToBackend, state) {
+    io.println("got to backend")
+    io.debug(msg)
+    case msg {
+      m8ball_shared.ToBackend(tb) -> {
+        io.println("got to backend")
+        io.debug(tb)
+        actor.continue(0)
+      }
+    }
+  }
+
   let assert Ok(connection_actor_subj) =
     actor.start_spec(actor.Spec(
       init: fn() {
-        // let msg = #(name, process.self())
-        // process.send(subject, msg)
-        //   io.println("Child started: " <> name)
-        let subj = process.new_subject()
-        actor.Ready(
-          0,
-          process.new_selector()
-            |> process.selecting(subj, fn(val) { val + 100 }),
-        )
+        let comm_subj: Subject(ToBackend) = process.new_subject()
+        actor.Ready(0, process.new_selector())
       },
+      // // |> process.selecting(subj, fn(val) { val + 100 })
+      // |> process.selecting(comm_subj, handle_to_backend),
       init_timeout: 10,
-      loop: fn(msg, state) {
-        // actor.start(0, fn(msg, state) {
-        // io.debug("got message on connection_actor" <> int.to_string(msg))
-        io.debug("got message on connection_actor" <> string.inspect(msg))
-
-        actor.continue(state)
-      },
+      loop: handle_to_backend,
     ))
+
+  // loop: fn(msg, state) {
+  //   // actor.start(0, fn(msg, state) {
+  //   // io.debug("got message on connection_actor" <> int.to_string(msg))
+  //   io.debug("got message on connection_actor" <> string.inspect(msg))
+  //   actor.continue(state)
+  // },
+  // let qwe: m8ball_shared.ToBackend = connection_actor_subj
   let assert Ok(connection_pid) =
     actor.to_erlang_start_result(Ok(connection_actor_subj))
 
@@ -179,7 +191,10 @@ pub fn supervisor_test() {
   io.println("specifically waiting to send back")
   case connection_msg {
     m8ball_shared.OpenConnection(client_subj) -> {
-      process.send(client_subj, m8ball_shared.MainSubject(main_subj))
+      process.send(
+        client_subj,
+        m8ball_shared.MainSubject(connection_actor_subj),
+      )
     }
     m8ball_shared.AckConnection(_) -> {
       io.println("shouldn't get ack, idk how to throw")

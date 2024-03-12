@@ -13,7 +13,7 @@ import gleam/otp/supervisor.{add, returning, worker}
 import gleam/otp/actor
 // import gleam/otp/task
 import gleam/otp/system
-import gleam/erlang/process
+import gleam/erlang/process.{type Subject}
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
 
@@ -21,7 +21,8 @@ import gleam/erlang/atom.{type Atom}
 //   process.Subject(String)
 
 pub type ClientData {
-  MainSubject(process.Subject(MainData))
+  // MainSubject(process.Subject(MainData))
+  MainSubject(Subject(ToBackend))
   // ClientData(String)
 }
 
@@ -37,6 +38,14 @@ pub type ConnectionMsg {
 pub type SharedData(t) {
   // SharedData(process.Pid)
   SharedData(ConnectionMsg)
+}
+
+pub type ToBackend {
+  ToBackend(#(String, String))
+}
+
+pub type ToFrontend {
+  ToFrontend(Int)
 }
 
 pub const node_name_sup = "m8ball_sup"

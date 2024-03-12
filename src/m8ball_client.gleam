@@ -17,7 +17,8 @@ import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
 import m8ball_shared.{
-  type SharedData, create_full_name, set_name_node_short_name,
+  type ClientData, type ConnectionMsg, type MainData, type SharedData,
+  type ToBackend, type ToFrontend, create_full_name, set_name_node_short_name,
 }
 
 fn connect_to_main_node() {
@@ -64,7 +65,7 @@ pub fn main() {
 
   case client_data {
     m8ball_shared.MainSubject(main_subj) -> {
-      process.send(main_subj, m8ball_shared.MainData(123_456))
+      process.send(main_subj, m8ball_shared.ToBackend(#("lefty", "righty")))
     }
   }
 }
