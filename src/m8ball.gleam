@@ -180,6 +180,19 @@ pub fn supervisor_test() {
         dynamic.tuple2(atom.from_dynamic, dynamic.int),
       )(val)
     })
+    |> process.selecting_anything(fn(val) {
+      io.println("trying2")
+      // let assert Ok(qwe) = atom.from_dynamic(a)
+      io.debug(val)
+      io.println("after2")
+      dynamic.decode1(
+        fn(a: #(Atom, Int)) {
+          io.debug(a.0)
+          m8ball_shared.SharedData(a.1)
+        },
+        dynamic.tuple2(atom.from_dynamic, dynamic.int),
+      )(val)
+    })
     // use d <- process.selecting_anything(dynamic.int)
     // d
     // |> process.map_selector(m8ball_shared.SharedData)
