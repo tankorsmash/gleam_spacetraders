@@ -147,13 +147,8 @@ pub fn supervisor_test() {
 
       let str_atom = atom.to_string(decoded_res.0)
       case #(str_atom, decoded_res.1) {
-        #("shared_data", int_val) -> {
-          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(int_val)))
-          // case dynamic.unsafe_coerce(int_val) {
-          // Ok(val) -> Ok(m8ball_shared.SharedData(val))
-          //   Error(err) -> Error(err)
-          // }
-          // Ok(m8ball_shared.SharedData(int_val))
+        #("shared_data", shared_data) -> {
+          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(shared_data)))
         }
         otherwise -> {
           Error([
