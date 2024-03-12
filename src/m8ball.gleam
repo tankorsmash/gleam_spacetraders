@@ -1,6 +1,6 @@
 import gleam/io
 // import gleam/erlang/os
-// import gleam/string
+import gleam/string
 import gleam/option.{type Option}
 import gleam/result
 import gleam/list
@@ -46,12 +46,27 @@ pub fn supervisor_test() {
   let proc_name_conn = m8ball_shared.proc_name_conn
 
   let assert Ok(connection_actor_subj) =
-    actor.start(0, fn(msg, state) {
-      io.debug("got message on connection_actor" <> int.to_string(msg))
+    actor.start_spec(actor.Spec(
+      init: fn() {
+        // let msg = #(name, process.self())
+        // process.send(subject, msg)
+        //   io.println("Child started: " <> name)
+        let subj = process.new_subject()
+        actor.Ready(
+          0,
+          process.new_selector()
+            |> process.selecting(subj, fn(val) { val + 100 }),
+        )
+      },
+      init_timeout: 10,
+      loop: fn(msg, state) {
+        // actor.start(0, fn(msg, state) {
+        // io.debug("got message on connection_actor" <> int.to_string(msg))
+        io.debug("got message on connection_actor" <> string.inspect(msg))
 
-      actor.continue(state)
-    })
-
+        actor.continue(state)
+      },
+    ))
   let assert Ok(connection_pid) =
     actor.to_erlang_start_result(Ok(connection_actor_subj))
 
