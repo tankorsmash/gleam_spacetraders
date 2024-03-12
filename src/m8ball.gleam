@@ -173,13 +173,18 @@ pub fn supervisor_test() {
       io.debug(val)
       io.println("after2")
 
-      let decoded = dynamic.tuple2(atom.from_dynamic, dynamic.int)(val)
+      let decoded = dynamic.tuple2(atom.from_dynamic, dynamic.dynamic)(val)
       use decoded_res <- result.try(decoded)
 
       let str_atom = atom.to_string(decoded_res.0)
       case #(str_atom, decoded_res.1) {
         #("shared_data", int_val) -> {
-          Ok(m8ball_shared.SharedData(int_val))
+          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(int_val)))
+          // case dynamic.unsafe_coerce(int_val) {
+          // Ok(val) -> Ok(m8ball_shared.SharedData(val))
+          //   Error(err) -> Error(err)
+          // }
+          // Ok(m8ball_shared.SharedData(int_val))
         }
         otherwise -> {
           Error([
@@ -216,8 +221,12 @@ pub fn supervisor_test() {
   // process.sleep_forever()
 
   io.println("waiting")
-  process.select_forever(selector)
-  |> io.debug()
+  let assert Ok(first_msg) =
+    process.select_forever(selector)
+    |> io.debug()
+
+  io.println("specifically waiting to send back")
+  node.send(first_msg, "star")
 
   io.println("waiting 2nd")
   process.select_forever(selector)

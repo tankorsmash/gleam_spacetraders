@@ -21,7 +21,7 @@ import gleam/erlang/atom.{type Atom}
 //   process.Subject(String)
 
 pub type SharedData {
-  SharedData(Int)
+  SharedData(process.Pid)
 }
 
 pub const node_name_sup = "m8ball_sup"

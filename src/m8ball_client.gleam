@@ -53,8 +53,9 @@ pub fn main() {
     sup_node,
     atom.create_from_string(m8ball_shared.proc_name_sup),
     // m8ball_shared.SharedData(123),
-    Temp(123),
+    m8ball_shared.SharedData(process.self()),
   )
+  // Temp(123),
   // 123,
   io.println("sent message to main proc")
   // node.send(
