@@ -20,12 +20,15 @@ import gleam/erlang/atom.{type Atom}
 @external(erlang, "net_kernel", "start")
 pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
 
-pub fn main() {
-  let name_atom = atom.create_from_string("m8ball_client")
-  // |> result.unwrap(panic("Failed to start net_kernel ketchup"))
+pub fn name_node_short_name(node_name: String) -> Result(Atom, Nil) {
+  let name_atom = atom.create_from_string(node_name)
   let shortnames_atom = atom.create_from_string("shortnames")
-  // |> result.unwrap(funpanic("Failed to start net_kernel shortnames"))
   let my_short_name = net_kernel_start_shortname([name_atom, shortnames_atom])
+  my_short_name
+}
+
+pub fn main() {
+  let my_short_name = name_node_short_name("m8ball_client")
 
   let sup_name_atom = atom.create_from_string("m8ball_sup")
   io.println("about to connect")
