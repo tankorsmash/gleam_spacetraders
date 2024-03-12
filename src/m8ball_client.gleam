@@ -16,16 +16,7 @@ import gleam/otp/system
 import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
-
-@external(erlang, "net_kernel", "start")
-pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
-
-pub fn name_node_short_name(node_name: String) -> Result(Atom, Nil) {
-  let name_atom = atom.create_from_string(node_name)
-  let shortnames_atom = atom.create_from_string("shortnames")
-  let my_short_name = net_kernel_start_shortname([name_atom, shortnames_atom])
-  my_short_name
-}
+import m8ball_shared.{type SharedSubject, name_node_short_name}
 
 pub fn main() {
   let my_short_name = name_node_short_name("m8ball_client")
@@ -34,8 +25,10 @@ pub fn main() {
   io.println("about to connect")
   let assert Ok(sup_node) =
     node.connect(atom.create_from_string("m8ball_sup@Josh-Desktop-V2"))
-  process.new_selector()
-  |> io.debug
+
+  let int_subject = process.new_subject()
+  let float_subject = process.new_subject()
+  process.send(int_subject, 1)
 
   node.visible()
   |> io.debug

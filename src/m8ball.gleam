@@ -16,6 +16,7 @@ import gleam/otp/system
 import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
+import m8ball_shared.{type SharedSubject, name_node_short_name}
 
 // [{kernel,
 // 	[{distributed, [{m8ball,
@@ -41,11 +42,14 @@ type MyMsg =
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
 
-  let name_atom = atom.create_from_string("m8ball_sup")
-  // |> result.unwrap(panic("Failed to start net_kernel ketchup"))
-  let shortnames_atom = atom.create_from_string("shortnames")
-  // |> result.unwrap(funpanic("Failed to start net_kernel shortnames"))
-  let short_name = net_kernel_start_shortname([name_atom, shortnames_atom])
+  let short_name = name_node_short_name("m8ball_sup")
+
+  let connection_actor =
+    actor.start(0, fn(msg, state) {
+      io.debug("got message on connection_actor" <> msg)
+      let short_name = name_node_short_name("m8ball_connection")
+      actor.continue(state)
+    })
 
   let actor_init = fn(name) {
     fn() {
