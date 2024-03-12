@@ -16,7 +16,7 @@ import gleam/otp/system
 import gleam/erlang/process
 import gleam/erlang/node
 import gleam/erlang/atom.{type Atom}
-import m8ball_shared.{type SharedSubject, name_node_short_name}
+import m8ball_shared.{type SharedSubject, set_name_node_short_name}
 
 // [{kernel,
 // 	[{distributed, [{m8ball,
@@ -42,7 +42,7 @@ type MyMsg =
 pub fn supervisor_test() {
   let subject: MySubject = process.new_subject()
 
-  let short_name = name_node_short_name(m8ball_shared.node_name_sup)
+  let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
   let assert Ok(connection_actor_subj) =
@@ -97,7 +97,7 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        // let num_children = 30_000
+        // let num_children = 30_000b
         let num_children = 0
         list.repeat(Nil, num_children)
         |> list.fold(from: children, with: fn(children, _) {
@@ -157,6 +157,9 @@ pub fn supervisor_test() {
   io.println("visiible nodes:")
   node.visible()
   |> io.debug
+
+  process.sleep_forever()
+
   io.println("waiting")
   process.select_forever(selector)
   |> io.debug()
