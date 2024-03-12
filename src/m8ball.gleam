@@ -135,8 +135,14 @@ pub fn supervisor_test() {
     process.self()
     |> process.register(atom.create_from_string(m8ball_shared.proc_name_sup))
 
+  let main_subj: process.Subject(m8ball_shared.MainData) = process.new_subject()
   let selector =
     process.new_selector()
+    // |> process.selecting(main_subj, fn(a) {
+    //   io.println("got main data")
+    //   io.debug(a)
+    //   Ok(a)
+    // })
     |> process.selecting_anything(fn(val) {
       io.println("trying2")
       io.debug(val)
@@ -147,8 +153,8 @@ pub fn supervisor_test() {
 
       let str_atom = atom.to_string(decoded_res.0)
       case #(str_atom, decoded_res.1) {
-        #("shared_data", shared_data) -> {
-          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(shared_data)))
+        #("shared_data", connection_msg) -> {
+          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(connection_msg)))
         }
         otherwise -> {
           Error([
@@ -166,12 +172,22 @@ pub fn supervisor_test() {
   // process.sleep_forever()
 
   io.println("waiting")
-  let assert Ok(m8ball_shared.SharedData(first_msg)) =
+  let assert Ok(m8ball_shared.SharedData(connection_msg)) =
     process.select_forever(selector)
     |> io.debug()
 
   io.println("specifically waiting to send back")
-  process.send(first_msg, "star")
+  case connection_msg {
+    m8ball_shared.OpenConnection(client_subj) -> {
+      process.send(client_subj, m8ball_shared.MainSubject(main_subj))
+    }
+    m8ball_shared.AckConnection(_) -> {
+      io.println("shouldn't get ack, idk how to throw")
+      // process.send(client_subj, m8ball_shared.MainSubject(main_subj))
+    }
+  }
+
+  // process.send(main_subj, "star")
 
   io.println("waiting 2nd")
   process.select_forever(selector)

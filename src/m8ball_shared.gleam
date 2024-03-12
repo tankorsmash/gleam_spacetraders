@@ -20,9 +20,23 @@ import gleam/erlang/atom.{type Atom}
 // pub type SharedSubject =
 //   process.Subject(String)
 
+pub type ClientData {
+  MainSubject(process.Subject(MainData))
+  // ClientData(String)
+}
+
+pub type MainData {
+  MainData(Int)
+}
+
+pub type ConnectionMsg {
+  OpenConnection(client_subj: process.Subject(ClientData))
+  AckConnection(main_subj: process.Subject(MainData))
+}
+
 pub type SharedData(t) {
   // SharedData(process.Pid)
-  SharedData(process.Subject(t))
+  SharedData(ConnectionMsg)
 }
 
 pub const node_name_sup = "m8ball_sup"

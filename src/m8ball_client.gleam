@@ -52,15 +52,21 @@ pub fn main() {
   node.send(
     sup_node,
     atom.create_from_string(m8ball_shared.proc_name_sup),
-    m8ball_shared.SharedData(my_subject),
+    m8ball_shared.SharedData(m8ball_shared.OpenConnection(my_subject)),
   )
 
   io.println("sent message to main proc")
   io.println("waiting to get subject back")
 
-  let assert Ok(node_sub) =
+  let assert Ok(client_data) =
     process.receive(my_subject, 1_000_000)
     |> io.debug
+
+  case client_data {
+    m8ball_shared.MainSubject(main_subj) -> {
+      process.send(main_subj, m8ball_shared.MainData(123_456))
+    }
+  }
 }
 
 type Temp {
