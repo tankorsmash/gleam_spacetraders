@@ -44,7 +44,7 @@ pub fn main() {
   let my_subject = process.new_subject()
   node.send(
     sup_node,
-    atom.create_from_string(m8ball_shared.proc_name_sup),
+    atom.create_from_string(m8ball_shared.proc_name_conn),
     m8ball_shared.OpenConnection(my_subject),
   )
 

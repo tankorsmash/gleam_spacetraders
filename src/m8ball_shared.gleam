@@ -32,7 +32,7 @@ pub type MainData {
 
 pub type ConnectionMsg {
   OpenConnection(client_subj: process.Subject(ClientData))
-  AckConnection(main_subj: process.Subject(MainData))
+  // AckConnection(main_subj: process.Subject(MainData))
 }
 
 pub type SharedData(t) {
