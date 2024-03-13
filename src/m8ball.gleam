@@ -29,39 +29,8 @@ import m8ball_shared.{
 // 	{sync_nodes_timeout, 30000}
 // 	]}].
 
-// const config_a: supervisor.Spec(arg,return) = supervisor.Spec(arg, max_frequency: 30000, frequency_period:5000, init: fn(
-
-@external(erlang, "net_kernel", "start")
-pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
-
-//   options: Atom,
-
-type MySubject =
-  process.Subject(MyMsg)
-
-type MyMsg =
-  #(String, process.Pid)
-
-pub fn supervisor_test() {
-  let subject: MySubject = process.new_subject()
-
-  let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
-  let proc_name_conn = m8ball_shared.proc_name_conn
-
-  let handle_to_backend = fn(msg: ToBackend, state: Int) {
-    io.println("got to backend")
-    io.debug(msg)
-    case msg {
-      m8ball_shared.ToBackend(tb) -> {
-        io.println("got to backend, I think that's pretty neat")
-        io.debug(tb)
-        actor.continue(0)
-      }
-    }
-  }
-  let assert Ok(subject_to_backend) = actor.start(0, handle_to_backend)
-  // let subject_to_backend: Subject(ToBackend) = process.new_subject()
-
+// const config_a: supervisor.Spec( arg,return) = supervisor.Spec(arg, max_frequency: 30000, frequency_period:5000, init: fn(
+pub fn create_connection_actor(subject_to_backend) {
   let handle_connection_msg = fn(msg: ConnectionMsg, state: Int) -> actor.Next(
     ConnectionMsg,
     Int,
@@ -143,8 +112,44 @@ pub fn supervisor_test() {
       init_timeout: 10,
       loop: handle_connection_msg,
     )
-  let assert Ok(connection_actor_subj) = actor.start_spec(conn_actor_spec)
+  // let assert Ok(connection_actor_subj) = actor.start_spec(conn_actor_spec)
+  // connection_actor_subj
+  actor.start_spec(conn_actor_spec)
+}
 
+@external(erlang, "net_kernel", "start")
+pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
+
+//   options: Atom,
+
+type MySubject =
+  process.Subject(MyMsg)
+
+type MyMsg =
+  #(String, process.Pid)
+
+pub fn supervisor_test() {
+  let subject: MySubject = process.new_subject()
+
+  let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
+  let proc_name_conn = m8ball_shared.proc_name_conn
+
+  let handle_to_backend = fn(msg: ToBackend, state: Int) {
+    io.println("got to backend")
+    io.debug(msg)
+    case msg {
+      m8ball_shared.ToBackend(tb) -> {
+        io.println("got to backend, I think that's pretty neat")
+        io.debug(tb)
+        actor.continue(0)
+      }
+    }
+  }
+  let assert Ok(subject_to_backend) = actor.start(0, handle_to_backend)
+  // let subject_to_backend: Subject(ToBackend) = process.new_subject()
+  let assert Ok(connection_actor_subj) =
+    create_connection_actor(subject_to_backend)
+  connection_actor_subj
   let assert Ok(connection_pid) =
     actor.to_erlang_start_result(Ok(connection_actor_subj))
 
