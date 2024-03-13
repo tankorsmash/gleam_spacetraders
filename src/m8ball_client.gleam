@@ -39,7 +39,6 @@ pub fn main() {
   let proc_name_connection =
     atom.create_from_string(m8ball_shared.proc_name_conn)
 
-  io.println("about to connect")
   let assert Ok(sup_node) = connect_to_main_node()
 
   let int_subject = process.new_subject()
@@ -53,7 +52,7 @@ pub fn main() {
   node.send(
     sup_node,
     atom.create_from_string(m8ball_shared.proc_name_sup),
-    m8ball_shared.SharedData(m8ball_shared.OpenConnection(my_subject)),
+    m8ball_shared.OpenConnection(my_subject),
   )
 
   io.println("sent message to main proc")

@@ -155,25 +155,49 @@ pub fn supervisor_test() {
     //   io.debug(a)
     //   Ok(a)
     // })
+    // |> process.selecting_anything(fn(val) {
+
+    |> process.selecting_record2(
+      atom.create_from_string("open_connection"),
+      fn(val) {
+        let decoded =
+          dynamic.tuple3(
+            //atom
+            atom.from_dynamic,
+            // subject
+            dynamic.dynamic,
+            // pid
+            dynamic.dynamic,
+          )(val)
+        use decoded_res <- result.try(decoded)
+
+        io.println("the val is")
+        io.debug(val)
+
+        let open_connection_msg: m8ball_shared.ConnectionMsg =
+          m8ball_shared.OpenConnection(dynamic.unsafe_coerce(val))
+
+        Ok(open_connection_msg)
+      },
+    )
+    // m8ball_shared.OpenConnection(#(
+    //   dynamic.unsafe_coerce(decoded_res.1),
+    //   dynamic.unsafe_coerce(decoded_res.2),
+    // ))
+    // let str_atom = atom.to_string(decoded_res.0)
+    // case #(str_atom, decoded_res.1) {
+    //   #("shared_data", connection_msg) -> {
+    //     Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(connection_msg)))
+    //   }
+    //   otherwise -> {
+    //     Error([
+    //       dynamic.DecodeError("'shared_data'", str_atom, ["top, i guess"]),
+    //     ])
+    //   }
+    // }
     |> process.selecting_anything(fn(val) {
-      io.println("trying2")
-      io.debug(val)
-      io.println("after2")
-
-      let decoded = dynamic.tuple2(atom.from_dynamic, dynamic.dynamic)(val)
-      use decoded_res <- result.try(decoded)
-
-      let str_atom = atom.to_string(decoded_res.0)
-      case #(str_atom, decoded_res.1) {
-        #("shared_data", connection_msg) -> {
-          Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(connection_msg)))
-        }
-        otherwise -> {
-          Error([
-            dynamic.DecodeError("'shared_data'", str_atom, ["top, i guess"]),
-          ])
-        }
-      }
+      Ok(io.debug(val))
+      todo
     })
     |> io.debug
 
@@ -184,7 +208,8 @@ pub fn supervisor_test() {
   // process.sleep_forever()
 
   io.println("waiting")
-  let assert Ok(m8ball_shared.SharedData(connection_msg)) =
+  // let assert Ok(m8ball_shared.SharedData(connection_msg)) =
+  let assert Ok(connection_msg) =
     process.select_forever(selector)
     |> io.debug()
 
