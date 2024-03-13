@@ -29,7 +29,6 @@ import m8ball_shared.{
 // 	{sync_nodes_timeout, 30000}
 // 	]}].
 
-// const config_a: supervisor.Spec( arg,return) = supervisor.Spec(arg, max_frequency: 30000, frequency_period:5000, init: fn(
 pub fn create_connection_actor(subject_to_backend) {
   let handle_connection_msg = fn(msg: ConnectionMsg, state: Int) -> actor.Next(
     ConnectionMsg,
@@ -40,31 +39,14 @@ pub fn create_connection_actor(subject_to_backend) {
     let qwe: ConnectionMsg = msg
     case msg {
       m8ball_shared.OpenConnection(_tb) -> {
-        // io.println("got open connection")
-        // io.debug(tb)
-        //   m8ball_shared.OpenConnection(client_subj) -> {
-        //     process.send(
-        //       client_subj,
-        //       m8ball_shared.MainSubject(connection_actor_subj),
-        //     )
-        //   }
         actor.continue(state)
       }
       m8ball_shared.AckConnection(_tb) -> {
-        // io.println("got open connection")
-        // io.debug(tb)
-        //   m8ball_shared.OpenConnection(client_subj) -> {
-        //     process.send(
-        //       client_subj,
-        //       m8ball_shared.MainSubject(connection_actor_subj),
-        //     )
-        //   }
         actor.continue(state)
       }
     }
   }
 
-  // _ -> actor.continue("ASD")
   let conn_actor_spec: actor.Spec(Int, ConnectionMsg) =
     actor.Spec(
       init: fn() {
@@ -76,7 +58,6 @@ pub fn create_connection_actor(subject_to_backend) {
             atom.create_from_string("open_connection"),
             fn(val) {
               let decoded =
-                // atom sub pid
                 dynamic.tuple3(
                   atom.from_dynamic,
                   dynamic.dynamic,
@@ -85,7 +66,6 @@ pub fn create_connection_actor(subject_to_backend) {
               case decoded {
                 Ok(decoded_res) -> {
                   io.println("the val is")
-                  // io.debug(val)
 
                   let assert m8ball_shared.OpenConnection(client_subj): m8ball_shared.ConnectionMsg =
                     m8ball_shared.OpenConnection(dynamic.unsafe_coerce(val))
@@ -107,20 +87,11 @@ pub fn create_connection_actor(subject_to_backend) {
 
         actor.Ready(initial_state, comm_sel)
       },
-      // // |> process.selecting(subj, fn(val) { val + 100 })
-      // |> process.selecting(comm_subj, handle_to_backend),
       init_timeout: 10,
       loop: handle_connection_msg,
     )
-  // let assert Ok(connection_actor_subj) = actor.start_spec(conn_actor_spec)
-  // connection_actor_subj
   actor.start_spec(conn_actor_spec)
 }
-
-@external(erlang, "net_kernel", "start")
-pub fn net_kernel_start_shortname(name: List(Atom)) -> Result(Atom, Nil)
-
-//   options: Atom,
 
 type MySubject =
   process.Subject(MyMsg)
@@ -134,7 +105,7 @@ pub fn supervisor_test() {
   let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
-  let handle_to_backend = fn(msg: ToBackend, state: Int) {
+  let handle_to_backend = fn(msg: ToBackend, _state: Int) {
     io.println("got to backend")
     io.debug(msg)
     case msg {
@@ -233,7 +204,7 @@ pub fn supervisor_test() {
       },
     )
     |> process.selecting_anything(fn(val) {
-      Ok(io.debug(val))
+      io.debug(val)
       todo
     })
     |> io.debug
@@ -243,34 +214,4 @@ pub fn supervisor_test() {
   |> io.debug
 
   process.sleep_forever()
-
-  // io.println("waiting")
-  // // let assert Ok(m8ball_shared.SharedData(connection_msg)) =
-  // let assert Ok(connection_msg) =
-  //   process.select_forever(selector)
-  //   |> io.debug()
-
-  // io.println("specifically waiting to send back")
-  // case connection_msg {
-  //   m8ball_shared.OpenConnection(client_subj) -> {
-  //     process.send(
-  //       client_subj,
-  //       m8ball_shared.MainSubject(connection_actor_subj),
-  //     )
-  //   }
-  // }
-
-  // m8ball_shared.AckConnection(_) -> {
-  //   io.println("shouldn't get ack, idk how to throw")
-  //   // process.send(client_subj, m8ball_shared.MainSubject(main_subj))
-  // }
-  // process.send(main_subj, "star")
-
-  io.println("waiting 2nd")
-  process.select_forever(selector)
-  |> io.debug()
-
-  io.println("waiting 3rd")
-  process.select_forever(selector)
-  |> io.debug()
 }
