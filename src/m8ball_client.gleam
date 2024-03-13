@@ -57,11 +57,11 @@ pub fn main() {
 
   io.println("got client data")
   io.debug(client_data)
-  // case client_data {
-  //   m8ball_shared.MainSubject(main_subj) -> {
-  //     process.send(main_subj, m8ball_shared.ToBackend(#("lefty", "righty")))
-  //   }
-  // }
+  case client_data {
+    m8ball_shared.MainSubjectAttached(main_subj) -> {
+      process.send(main_subj, m8ball_shared.ToBackend(#("lefty", "righty")))
+    }
+  }
 }
 
 type Temp {

@@ -48,19 +48,19 @@ pub fn supervisor_test() {
   let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
-  let subject_to_backend: Subject(ToBackend) = process.new_subject()
   let handle_to_backend = fn(msg: ToBackend, state: Int) {
     io.println("got to backend")
     io.debug(msg)
     case msg {
       m8ball_shared.ToBackend(tb) -> {
-        io.println("got to backend")
+        io.println("got to backend, I think that's pretty neat")
         io.debug(tb)
         actor.continue(0)
       }
     }
   }
-  let backend_actor = actor.start(0, handle_to_backend)
+  let assert Ok(subject_to_backend) = actor.start(0, handle_to_backend)
+  // let subject_to_backend: Subject(ToBackend) = process.new_subject()
 
   let handle_connection_msg = fn(msg: ConnectionMsg, state: Int) -> actor.Next(
     ConnectionMsg,
