@@ -41,13 +41,6 @@ pub fn main() {
 
   let assert Ok(sup_node) = connect_to_main_node()
 
-  let int_subject = process.new_subject()
-  let float_subject = process.new_subject()
-  process.send(int_subject, 1)
-
-  node.visible()
-  |> io.debug
-
   let my_subject = process.new_subject()
   node.send(
     sup_node,

@@ -72,13 +72,6 @@ pub fn supervisor_test() {
       loop: handle_to_backend,
     ))
 
-  // loop: fn(msg, state) {
-  //   // actor.start(0, fn(msg, state) {
-  //   // io.debug("got message on connection_actor" <> int.to_string(msg))
-  //   io.debug("got message on connection_actor" <> string.inspect(msg))
-  //   actor.continue(state)
-  // },
-  // let qwe: m8ball_shared.ToBackend = connection_actor_subj
   let assert Ok(connection_pid) =
     actor.to_erlang_start_result(Ok(connection_actor_subj))
 
@@ -87,15 +80,8 @@ pub fn supervisor_test() {
   let assert Ok(_) =
     process.register(connection_pid, atom.create_from_string(proc_name_conn))
 
-  // system.get_state(connection_actor_sub)
-
   let actor_init = fn(name) {
-    fn() {
-      // let msg = #(name, process.self())
-      // process.send(subject, msg)
-      //   io.println("Child started: " <> name)
-      actor.Ready(name, process.new_selector())
-    }
+    fn() { actor.Ready(name, process.new_selector()) }
   }
 
   let actor_loop = fn(_msg, state) { actor.continue(state) }
@@ -136,11 +122,6 @@ pub fn supervisor_test() {
   |> should.be_ok
 
   process.receive(subject, 10)
-  // Assert children have started
-  // let assert Ok(#("1", p)) = process.receive(subject, 10)
-  //   let assert Ok(#("2", _)) = process.receive(subject, 10)
-  //   let assert Ok(#("3", _)) = process.receive(subject, 10)
-  //   let assert Error(Nil) = process.receive(subject, 10)
 
   // register self's proc name
   let assert Ok(Nil) =
@@ -150,13 +131,6 @@ pub fn supervisor_test() {
   let main_subj: process.Subject(m8ball_shared.MainData) = process.new_subject()
   let selector =
     process.new_selector()
-    // |> process.selecting(main_subj, fn(a) {
-    //   io.println("got main data")
-    //   io.debug(a)
-    //   Ok(a)
-    // })
-    // |> process.selecting_anything(fn(val) {
-
     |> process.selecting_record2(
       atom.create_from_string("open_connection"),
       fn(val) {
@@ -180,21 +154,6 @@ pub fn supervisor_test() {
         Ok(open_connection_msg)
       },
     )
-    // m8ball_shared.OpenConnection(#(
-    //   dynamic.unsafe_coerce(decoded_res.1),
-    //   dynamic.unsafe_coerce(decoded_res.2),
-    // ))
-    // let str_atom = atom.to_string(decoded_res.0)
-    // case #(str_atom, decoded_res.1) {
-    //   #("shared_data", connection_msg) -> {
-    //     Ok(m8ball_shared.SharedData(dynamic.unsafe_coerce(connection_msg)))
-    //   }
-    //   otherwise -> {
-    //     Error([
-    //       dynamic.DecodeError("'shared_data'", str_atom, ["top, i guess"]),
-    //     ])
-    //   }
-    // }
     |> process.selecting_anything(fn(val) {
       Ok(io.debug(val))
       todo
