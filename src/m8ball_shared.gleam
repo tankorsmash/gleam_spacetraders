@@ -27,12 +27,12 @@ pub type ClientData {
 }
 
 pub type MainData {
-  MainData(Int)
+  MainData(Subject(ToFrontend))
 }
 
 pub type ConnectionMsg {
-  OpenConnection(client_subj: process.Subject(ClientData))
-  // AckConnection(main_subj: process.Subject(MainData))
+  OpenConnection(client_subj: process.Subject(ToFrontend))
+  AckConnection(main_subj: process.Subject(ToBackend))
 }
 
 pub type SharedData(t) {
@@ -45,7 +45,8 @@ pub type ToBackend {
 }
 
 pub type ToFrontend {
-  ToFrontend(Int)
+  // ToFrontend(Int)
+  MainSubjectAttached(process.Subject(ToBackend))
 }
 
 pub const node_name_sup = "m8ball_sup"

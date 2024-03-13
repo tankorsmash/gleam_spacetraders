@@ -48,17 +48,20 @@ pub fn supervisor_test() {
   let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
-  // let handle_to_backend = fn(msg: ToBackend, state) {
-  //   io.println("got to backend")
-  //   io.debug(msg)
-  //   case msg {
-  //     m8ball_shared.ToBackend(tb) -> {
-  //       io.println("got to backend")
-  //       io.debug(tb)
-  //       actor.continue(0)
-  //     }
-  //   }
-  // }
+  let subject_to_backend: Subject(ToBackend) = process.new_subject()
+  let handle_to_backend = fn(msg: ToBackend, state: Int) {
+    io.println("got to backend")
+    io.debug(msg)
+    case msg {
+      m8ball_shared.ToBackend(tb) -> {
+        io.println("got to backend")
+        io.debug(tb)
+        actor.continue(0)
+      }
+    }
+  }
+  let backend_actor = actor.start(0, handle_to_backend)
+
   let handle_connection_msg = fn(msg: ConnectionMsg, state: Int) -> actor.Next(
     ConnectionMsg,
     Int,
@@ -68,6 +71,17 @@ pub fn supervisor_test() {
     let qwe: ConnectionMsg = msg
     case msg {
       m8ball_shared.OpenConnection(_tb) -> {
+        // io.println("got open connection")
+        // io.debug(tb)
+        //   m8ball_shared.OpenConnection(client_subj) -> {
+        //     process.send(
+        //       client_subj,
+        //       m8ball_shared.MainSubject(connection_actor_subj),
+        //     )
+        //   }
+        actor.continue(state)
+      }
+      m8ball_shared.AckConnection(_tb) -> {
         // io.println("got open connection")
         // io.debug(tb)
         //   m8ball_shared.OpenConnection(client_subj) -> {
@@ -104,14 +118,15 @@ pub fn supervisor_test() {
                   io.println("the val is")
                   // io.debug(val)
 
-                  let open_connection_msg: m8ball_shared.ConnectionMsg =
+                  let assert m8ball_shared.OpenConnection(client_subj): m8ball_shared.ConnectionMsg =
                     m8ball_shared.OpenConnection(dynamic.unsafe_coerce(val))
 
-                  // Ok(open_connection_msg)
-                  // actor.continue(0)
-                  // Ok(val)
-                  // val
-                  open_connection_msg
+                  actor.send(
+                    client_subj,
+                    m8ball_shared.MainSubjectAttached(subject_to_backend),
+                  )
+
+                  m8ball_shared.OpenConnection(dynamic.unsafe_coerce(val))
                 }
 
                 Error(_) -> {
