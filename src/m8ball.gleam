@@ -51,7 +51,6 @@ pub fn create_connection_actor(subject_to_backend) {
     actor.Spec(
       init: fn() {
         let initial_state = 0
-        let comm_subj: Subject(ConnectionMsg) = process.new_subject()
         let comm_sel =
           process.new_selector()
           |> process.selecting_record2(
@@ -93,16 +92,7 @@ pub fn create_connection_actor(subject_to_backend) {
   actor.start_spec(conn_actor_spec)
 }
 
-type MySubject =
-  process.Subject(MyMsg)
-
-type MyMsg =
-  #(String, process.Pid)
-
 pub fn supervisor_test() {
-  let subject: MySubject = process.new_subject()
-
-  let short_name = set_name_node_short_name(m8ball_shared.node_name_sup)
   let proc_name_conn = m8ball_shared.proc_name_conn
 
   let handle_to_backend = fn(msg: ToBackend, _state: Int) {
@@ -117,7 +107,6 @@ pub fn supervisor_test() {
     }
   }
   let assert Ok(subject_to_backend) = actor.start(0, handle_to_backend)
-  // let subject_to_backend: Subject(ToBackend) = process.new_subject()
   let assert Ok(connection_actor_subj) =
     create_connection_actor(subject_to_backend)
   connection_actor_subj
