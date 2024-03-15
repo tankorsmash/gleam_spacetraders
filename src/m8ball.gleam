@@ -148,7 +148,7 @@ pub fn supervisor_test() {
       frequency_period: 1,
       max_frequency: 5,
       init: fn(children) {
-        // let num_children = 30_000b
+        // let num_children = 30_000
         let num_children = 0
         list.repeat(Nil, num_children)
         |> list.fold(from: children, with: fn(children, _) {
