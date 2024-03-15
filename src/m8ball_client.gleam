@@ -39,7 +39,17 @@ pub fn main() {
   let proc_name_connection =
     atom.create_from_string(m8ball_shared.proc_name_conn)
 
-  let assert Ok(sup_node) = connect_to_main_node()
+  let connection_to_main_node_result = connect_to_main_node()
+  let sup_node = case connection_to_main_node_result {
+    Ok(sup_node) -> {
+      io.println("connected to main node")
+      sup_node
+    }
+    Error(err) -> {
+      io.println("error connecting to main node: " <> string.inspect(err))
+      panic()
+    }
+  }
 
   let my_subject = process.new_subject()
   node.send(

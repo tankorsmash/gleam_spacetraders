@@ -94,6 +94,7 @@ pub fn create_connection_actor(subject_to_backend) {
 
 pub fn supervisor_test() {
   let proc_name_conn = m8ball_shared.proc_name_conn
+  let _ = set_name_node_short_name(m8ball_shared.node_name_sup)
 
   let handle_to_backend = fn(msg: ToBackend, _state: Int) {
     io.println("got to backend")
