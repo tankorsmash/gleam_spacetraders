@@ -21,13 +21,20 @@ import m8ball_shared.{
   type ToBackend, type ToFrontend, create_full_name, set_name_node_short_name,
 }
 
-// [{kernel,
-// 	[{distributed, [{m8ball,
-// 		5000,
-// 		['a@Josh-Desktop-V2', {'b@Josh-Desktop-V2', 'c@Josh-Desktop-V2'}]}]},
-// 	{sync_nodes_mandatory, ['b@Josh-Desktop-V2', 'c@Josh-Desktop-V2']},
-// 	{sync_nodes_timeout, 30000}
-// 	]}].
+pub fn create_backend_actor() {
+  let handle_to_backend = fn(msg: ToBackend, _state: Int) {
+    io.println("got to backend")
+    io.debug(msg)
+    case msg {
+      m8ball_shared.ToBackend(tb) -> {
+        io.println("got to backend, I think that's pretty neat")
+        io.debug(tb)
+        actor.continue(0)
+      }
+    }
+  }
+  actor.start(0, handle_to_backend)
+}
 
 pub fn create_connection_actor(subject_to_backend) {
   let handle_connection_msg = fn(msg: ConnectionMsg, state: Int) -> actor.Next(
@@ -96,21 +103,10 @@ pub fn supervisor_test() {
   let proc_name_conn = m8ball_shared.proc_name_conn
   let _ = set_name_node_short_name(m8ball_shared.node_name_sup)
 
-  let handle_to_backend = fn(msg: ToBackend, _state: Int) {
-    io.println("got to backend")
-    io.debug(msg)
-    case msg {
-      m8ball_shared.ToBackend(tb) -> {
-        io.println("got to backend, I think that's pretty neat")
-        io.debug(tb)
-        actor.continue(0)
-      }
-    }
-  }
-  let assert Ok(subject_to_backend) = actor.start(0, handle_to_backend)
+  let assert Ok(subject_to_backend) = create_backend_actor()
   let assert Ok(connection_actor_subj) =
     create_connection_actor(subject_to_backend)
-  connection_actor_subj
+
   let assert Ok(connection_pid) =
     actor.to_erlang_start_result(Ok(connection_actor_subj))
 
