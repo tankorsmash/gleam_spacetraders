@@ -9,7 +9,7 @@ import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
-import st_response.{type ApiResponse}
+import st_response.{type ApiResponse, extract_data}
 import contract.{type Contract, decode_contract_response}
 import st_waypoint
 import st_agent
@@ -59,24 +59,28 @@ pub fn main() {
     //   |> io.debug
     // -----
     |> st_ship.get_my_ships()
-  // |> contract.get_my_contracts
-  // |> expect_200_body
-  // |> extract_data
-  // |> list.map(with: fn(contract: Contract) {
-  //   io.debug(
-  //     "Has contract been accepted ?: " <> bool.to_string(contract.accepted),
-  //   )
-  //   contract
-  // })
-  // |> io.debug
-  // ----
-  // |> contract.accept_contract(contract_id)
-  // |> expect_200_body
-  // |> io.debug
-  //-----
-  // |> st_waypoint.get_waypoints_for_system("X1-NB8", [
-  //   // st_waypoint.Trait("MARKETPLACE", "", ""),
-  //   st_waypoint.Trait("CORRUPT", "", ""),
-  // ])
-  // |> io.debug
+    // |> contract.get_my_contracts
+
+    // |> list.map(with: fn(contract: Contract) {
+    //   io.debug(
+    //     "Has contract been accepted ?: " <> bool.to_string(contract.accepted),
+    //   )
+    //   contract
+    // })
+    // |> io.debug
+    // ----
+    // |> contract.accept_contract(contract_id)
+    // |> expect_200_body
+    // |> io.debug
+    //-----
+    // |> st_waypoint.get_waypoints_for_system("X1-NB8", [
+    //   // st_waypoint.Trait("MARKETPLACE", "", ""),
+    //   st_waypoint.Trait("CORRUPT", "", ""),
+    // ])
+    // ------
+
+    |> st_response.force_body_response_data
+    // |> expect_200_body
+    // |> extract_data
+    |> io.debug
 }

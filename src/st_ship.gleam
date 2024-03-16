@@ -561,9 +561,9 @@ pub fn get_my_ships(client: falcon.Client) {
     // Raw(dynamic.dynamic),
     [],
   )
-  |> should.be_ok
-  |> core.extract_body
-  |> st_response.extract_data
+  // |> should.be_ok
+  // |> core.extract_body
+  // |> st_response.extract_data
   //   |> decode_ships()
-  |> io.debug
+  // |> io.debug
 }

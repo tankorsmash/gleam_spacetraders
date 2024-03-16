@@ -46,3 +46,10 @@ pub fn decode_data(field_decoder) {
 pub fn extract_data(resp: ApiResponse(data)) -> data {
   resp.data
 }
+
+pub fn force_body_response_data(resp: WebResponse(data)) -> data {
+  resp
+  |> should.be_ok
+  |> core.extract_body
+  |> extract_data
+}
