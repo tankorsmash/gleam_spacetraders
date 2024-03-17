@@ -53,3 +53,18 @@ pub fn force_body_response_data(resp: WebResponse(data)) -> data {
   |> core.extract_body
   |> extract_data
 }
+
+pub fn expect_status(status: Int) {
+  fn(resp: FalconResponse(anything)) {
+    should.be_true(resp.status == status)
+    resp
+  }
+}
+
+pub fn expect_200_body(resp: WebResponse(value)) -> value {
+  resp
+  |> should.be_ok
+  |> expect_status(200)
+  |> core.extract_body
+  |> extract_data
+}

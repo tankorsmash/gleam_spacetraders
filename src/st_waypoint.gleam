@@ -197,22 +197,15 @@ pub fn decode_chart() {
 
 pub fn get_waypoints_for_system(
   client: falcon.Client,
-  system_name: String,
+  system_symbol: String,
   traits: List(Trait),
-) {
+) -> st_response.WebResult(List(Waypoint)) {
   let decoder = st_response.decode_data(dynamic.list(decode_waypoint()))
+  let url = "systems/" <> system_symbol <> "/waypoints"
   client
-  |> falcon.get(
-    "systems/" <> system_name <> "/waypoints",
-    expecting: Json(decoder),
-    // expecting: Raw(dynamic.dynamic),
-    options: [
-      Queries([
-        #(
-          "traits",
-          string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
-        ),
-      ]),
-    ],
-  )
+  |> falcon.get(url, expecting: Json(decoder), options: [
+    Queries([
+      #("traits", string.join(list.map(traits, fn(t) { t.symbol }), with: ",")),
+    ]),
+  ])
 }

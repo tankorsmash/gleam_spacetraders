@@ -567,3 +567,7 @@ pub fn get_my_ships(client: falcon.Client) {
   //   |> decode_ships()
   // |> io.debug
 }
+
+pub fn get_ship_waypoint(ship: Ship) -> String {
+  ship.nav.waypoint_symbol
+}

@@ -33,54 +33,12 @@ fn create_client() -> Client {
 // @external(erlang, "Elixir.SpaceTradersAPI.Connection", "new")
 // pub fn new_elixir_client() -> String
 
-pub fn expect_status(status: Int) {
-  fn(resp: FalconResponse(anything)) {
-    should.be_true(resp.status == status)
-    resp
-  }
-}
-
-pub fn expect_200_body(resp: st_response.WebResult(value)) -> value {
-  resp
-  |> should.be_ok
-  |> expect_status(200)
-  |> core.extract_body
-}
-
 const contract_id: String = "clthywl03m46cs60cl8ezck89f"
 
 pub fn main() {
   dotenv.config()
   let client =
     create_client()
-    // let my_waypoint =
-    //   client
-    //   |> st_agent.get_my_agent()
-    //   |> io.debug
-    // -----
-    |> st_ship.get_my_ships()
-    // |> contract.get_my_contracts
-
-    // |> list.map(with: fn(contract: Contract) {
-    //   io.debug(
-    //     "Has contract been accepted ?: " <> bool.to_string(contract.accepted),
-    //   )
-    //   contract
-    // })
-    // |> io.debug
-    // ----
-    // |> contract.accept_contract(contract_id)
-    // |> expect_200_body
-    // |> io.debug
-    //-----
-    // |> st_waypoint.get_waypoints_for_system("X1-NB8", [
-    //   // st_waypoint.Trait("MARKETPLACE", "", ""),
-    //   st_waypoint.Trait("CORRUPT", "", ""),
-    // ])
-    // ------
-
-    |> st_response.force_body_response_data
-    // |> expect_200_body
-    // |> extract_data
+    |> st_waypoint.get_waypoints_for_system("X1-KS19", [])
     |> io.debug
 }
