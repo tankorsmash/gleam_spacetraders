@@ -209,3 +209,13 @@ pub fn get_waypoints_for_system(
     ]),
   ])
 }
+
+pub fn show_traits_for_waypoints(waypoints: List(Waypoint)) -> String {
+  list.map(waypoints, fn(wp: Waypoint) {
+    let traits = string.join(list.map(wp.traits, fn(t) { t.name }), with: ", ")
+    let name = wp.symbol
+
+    "- " <> name <> " (" <> traits <> ")"
+  })
+  |> string.join(with: "\n")
+}

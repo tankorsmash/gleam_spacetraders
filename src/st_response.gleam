@@ -68,3 +68,10 @@ pub fn expect_200_body(resp: WebResponse(value)) -> value {
   |> core.extract_body
   |> extract_data
 }
+
+pub fn expect_200_body_result(resp: WebResult(value)) -> value {
+  resp
+  |> should.be_ok
+  |> expect_status(200)
+  |> core.extract_body
+}
