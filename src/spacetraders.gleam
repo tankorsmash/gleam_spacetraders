@@ -130,13 +130,19 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
     let module_names = list.map(ship.modules, fn(m: st_ship.Module) { m.name })
     let symbol = ship.symbol
     symbol
-    <> " - ("
+    <> " ("
     <> ship.frame.name
-    <> ") Inv: "
-    <> int.to_string(list.length(ship.cargo.inventory))
+    <> ")"
+    <> " -- Nav: "
+    <> ship.nav.waypoint_symbol
     <> " - "
+    <> ship.nav.status
+    <> "\n Inv: "
+    <> int.to_string(list.length(ship.cargo.inventory))
+    <> "\n Mods: "
     <> string.join(module_names, ", ")
   }
+
   create_client()
   |> st_ship.get_my_ships
   |> st_response.expect_200_body
