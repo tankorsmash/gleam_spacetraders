@@ -14,15 +14,15 @@ pub type Meta {
   Meta(total: Int, page: Int, limit: Int)
 }
 
-pub type ApiResponse(data) {
-  ApiResponse(data: data, meta: Meta)
+pub type PagedResponse(data) {
+  PagedResponse(data: data, meta: Meta)
 }
 
 pub type WebResult(data) =
   Result(FalconResponse(data), FalconError)
 
 pub type WebResponse(data) =
-  Result(FalconResponse(ApiResponse(data)), FalconError)
+  Result(FalconResponse(PagedResponse(data)), FalconError)
 
 pub fn decode_meta() {
   dynamic.decode3(
@@ -33,9 +33,9 @@ pub fn decode_meta() {
   )
 }
 
-pub fn decode_response(field_decoder) {
+pub fn decode_paged_response(field_decoder) {
   dynamic.decode2(
-    ApiResponse,
+    PagedResponse,
     dynamic.field("data", field_decoder),
     dynamic.field("meta", decode_meta()),
   )
@@ -45,8 +45,12 @@ pub fn decode_data(field_decoder) {
   dynamic.field("data", field_decoder)
 }
 
-pub fn extract_data(resp: ApiResponse(data)) -> data {
+pub fn extract_data(resp: PagedResponse(data)) -> data {
   resp.data
+}
+
+pub fn extract_meta(resp: PagedResponse(data)) -> Meta {
+  resp.meta
 }
 
 pub fn force_body_response_data(resp: WebResponse(data)) -> data {
@@ -76,6 +80,14 @@ pub fn expect_200_body_result(resp: WebResult(value)) -> value {
   |> should.be_ok
   |> expect_status(200)
   |> core.extract_body
+}
+
+pub fn expect_200_meta(resp: WebResponse(value)) -> Meta {
+  resp
+  |> should.be_ok
+  |> expect_status(200)
+  |> core.extract_body
+  |> extract_meta
 }
 
 pub fn optional_field_with_default(

@@ -556,7 +556,7 @@ pub fn get_my_ships(client: falcon.Client) {
   client
   |> falcon.get(
     "/my/ships/",
-    Json(st_response.decode_response(decode_ships())),
+    Json(st_response.decode_paged_response(decode_ships())),
     // Json(st_response.decode_response(dynamic.dynamic)),
     // Raw(dynamic.dynamic),
     [],

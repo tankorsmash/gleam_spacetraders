@@ -11,7 +11,7 @@ import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 // spacetraders
-import st_response.{type ApiResponse, extract_data}
+import st_response.{type PagedResponse, extract_data}
 import contract.{type Contract, decode_contract_response}
 import st_waypoint
 import st_agent

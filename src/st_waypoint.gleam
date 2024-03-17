@@ -206,6 +206,7 @@ pub fn get_waypoints_for_system(
   |> falcon.get(url, expecting: Json(decoder), options: [
     Queries([
       #("traits", string.join(list.map(traits, fn(t) { t.symbol }), with: ",")),
+      #("limit", "20"),
     ]),
   ])
 }

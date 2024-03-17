@@ -89,7 +89,7 @@ pub fn decode_meta() {
 
 pub fn decode_contract_response() {
   dynamic.decode2(
-    st_response.ApiResponse,
+    st_response.PagedResponse,
     dynamic.field("data", dynamic.list(decode_contract())),
     dynamic.field("meta", decode_meta()),
   )
