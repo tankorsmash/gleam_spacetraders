@@ -4,6 +4,7 @@ import dotenv
 import gleam/erlang/os
 import gleam/string
 import gleam/list
+import gleam/int
 import gleam/bool
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
@@ -78,10 +79,36 @@ fn view_waypoints(input: glint.CommandInput) -> String {
   |> st_waypoint.show_traits_for_waypoints
 }
 
+fn view_shipyard(input: glint.CommandInput) -> String {
+  io.println("viewing shipyard")
+  let assert Ok(system_symbol) =
+    flag.get_string(from: input.flags, for: system_flag_name)
+  let assert Ok(waypoint_symbol) =
+    flag.get_string(from: input.flags, for: waypoint_flag_name)
+  let shipyard =
+    create_client()
+    |> st_shipyard.view_available_ships(system_symbol, waypoint_symbol)
+    |> st_response.expect_200_body_result
+
+  let types =
+    shipyard.ship_types
+    |> list.map(fn(x) { x.type_ })
+    |> string.join(", ")
+
+  let mod_fee =
+    shipyard.modifications_fee
+    |> int.to_string
+
+  let ships =
+    shipyard.ships
+    |> list.map(fn(ship) { ship.frame.symbol })
+  types <> "\nModification fee: " <> mod_fee <> "\n" <> string.join(ships, ", ")
+}
+
 pub fn main() {
   dotenv.config()
 
-  let returned_value =
+  let _ =
     glint.new()
     |> glint.with_name("spacetraders")
     |> glint.with_pretty_help(glint.default_pretty_help())
@@ -96,6 +123,13 @@ pub fn main() {
         |> glint.flag(system_flag_name, system_flag())
         // |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view waypoints for a given system"),
+    )
+    |> glint.add(
+      at: ["shipyard"],
+      do: glint.command(view_shipyard)
+        |> glint.flag(system_flag_name, system_flag())
+        |> glint.flag(waypoint_flag_name, waypoint_flag())
+        |> glint.description("view shipyard for a given waypoint"),
     )
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
       io.println("the returned value is:\n" <> x)

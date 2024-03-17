@@ -192,10 +192,7 @@ pub fn view_available_ships(
       <> "/waypoints/"
       <> waypoint_symbol
       <> "/shipyard",
-    Json(fn(val) {
-      io.debug(val)
-      dynamic.field("data", decode_shipyard())(val)
-    }),
+    Json(fn(val) { dynamic.field("data", decode_shipyard())(val) }),
     // Json(st_response.decode_response(dynamic.dynamic)),
     // Raw(dynamic.dynamic),
     [],
