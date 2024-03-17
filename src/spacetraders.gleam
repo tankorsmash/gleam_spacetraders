@@ -14,6 +14,7 @@ import contract.{type Contract, decode_contract_response}
 import st_waypoint
 import st_agent
 import st_ship
+import st_shipyard
 
 fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
@@ -32,11 +33,15 @@ pub fn main() {
   dotenv.config()
 
   create_client()
-  |> st_waypoint.get_waypoints_for_system("X1-KS19", [
-    st_waypoint.Trait("SHIPYARD", "", ""),
-  ])
+  // |> st_agent.get_my_agent
+  |> st_shipyard.view_available_ships("X1-KS19", "X1-KS19-C41")
   |> st_response.expect_200_body_result
-  |> st_waypoint.show_traits_for_waypoints
+  // ---
+  // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
+  //   st_waypoint.Trait("SHIPYARD", "", ""),
+  // ])
+  // |> st_response.expect_200_body_result
+  // |> st_waypoint.show_traits_for_waypoints
   // ------ ships and their modules
   // |> st_ship.get_my_ships
   // |> st_response.expect_200_body
@@ -49,6 +54,6 @@ pub fn main() {
   //     symbol <> string.join(module_names, ", ")
   //   })
   // }
-  // |> io.debug
-  |> io.println
+  |> io.debug
+  // |> io.println
 }
