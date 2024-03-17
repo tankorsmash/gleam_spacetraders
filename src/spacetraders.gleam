@@ -85,6 +85,8 @@ fn view_shipyard(input: glint.CommandInput) -> String {
     flag.get_string(from: input.flags, for: system_flag_name)
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
+
+  io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
   let shipyard =
     create_client()
     |> st_shipyard.view_available_ships(system_symbol, waypoint_symbol)
@@ -111,7 +113,13 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
   let ship_formatter = fn(ship: st_ship.Ship) {
     let module_names = list.map(ship.modules, fn(m: st_ship.Module) { m.name })
     let symbol = ship.symbol
-    symbol <> " - " <> string.join(module_names, ", ")
+    symbol
+    <> " - ("
+    <> ship.frame.name
+    <> ") Inv: "
+    <> int.to_string(list.length(ship.cargo.inventory))
+    <> " - "
+    <> string.join(module_names, ", ")
   }
   create_client()
   |> st_ship.get_my_ships
@@ -144,7 +152,6 @@ pub fn main() {
       at: ["waypoints"],
       do: glint.command(view_waypoints)
         |> glint.flag(system_flag_name, system_flag())
-        // |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view waypoints for a given system"),
     )
     |> glint.add(
@@ -157,30 +164,4 @@ pub fn main() {
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
       io.println("the returned value is:\n" <> x)
     })
-  // io.debug(argv.load().arguments)
-
-  // create_client()
-  // // |> st_agent.get_my_agent
-  // |> st_shipyard.view_available_ships("X1-KS19", "X1-KS19-C41")
-  // |> st_response.expect_200_body_result
-  // // ---
-  // // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
-  // //   st_waypoint.Trait("SHIPYARD", "", ""),
-  // // ])
-  // // |> st_response.expect_200_body_result
-  // // |> st_waypoint.show_traits_for_waypoints
-  // // ------ ships and their modules
-  // // |> st_ship.get_my_ships
-  // // |> st_response.expect_200_body
-  // // |> fn(ships: List(st_ship.Ship)) {
-  // //   ships
-  // //   |> list.map(fn(ship: st_ship.Ship) {
-  // //     let module_names =
-  // //       list.map(ship.modules, fn(m: st_ship.Module) { m.name })
-  // //     let symbol = ship.symbol
-  // //     symbol <> string.join(module_names, ", ")
-  // //   })
-  // // }
-  // |> io.debug
-  // // |> io.println
 }
