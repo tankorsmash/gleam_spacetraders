@@ -105,6 +105,24 @@ fn view_shipyard(input: glint.CommandInput) -> String {
   types <> "\nModification fee: " <> mod_fee <> "\n" <> string.join(ships, ", ")
 }
 
+fn view_my_ships(_input: glint.CommandInput) -> String {
+  io.println("viewing my ships")
+
+  let ship_formatter = fn(ship: st_ship.Ship) {
+    let module_names = list.map(ship.modules, fn(m: st_ship.Module) { m.name })
+    let symbol = ship.symbol
+    symbol <> " - " <> string.join(module_names, ", ")
+  }
+  create_client()
+  |> st_ship.get_my_ships
+  |> st_response.expect_200_body
+  |> fn(ships: List(st_ship.Ship)) {
+    ships
+    |> list.map(ship_formatter)
+    |> string.join("\n")
+  }
+}
+
 pub fn main() {
   dotenv.config()
 
@@ -116,6 +134,11 @@ pub fn main() {
       at: ["agent"],
       do: glint.command(view_agent)
         |> glint.description("view your agent"),
+    )
+    |> glint.add(
+      at: ["my_ships"],
+      do: glint.command(view_my_ships)
+        |> glint.description("view my ships"),
     )
     |> glint.add(
       at: ["waypoints"],
