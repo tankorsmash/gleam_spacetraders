@@ -156,7 +156,7 @@ pub fn decode_shipyard() {
         dynamic.field("type", dynamic.string),
       )),
     ),
-    dynamic.field(
+    st_response.optional_unwrap_field(
       "transactions",
       dynamic.list(dynamic.decode6(
         Transaction,
@@ -167,8 +167,13 @@ pub fn decode_shipyard() {
         dynamic.field("agentSymbol", dynamic.string),
         dynamic.field("timestamp", dynamic.string),
       )),
+      [],
     ),
-    dynamic.field("ships", dynamic.list(st_ship.decode_ship())),
+    st_response.optional_unwrap_field(
+      "ships",
+      dynamic.list(st_ship.decode_ship()),
+      [],
+    ),
     dynamic.field("modificationsFee", dynamic.int),
   )
 }

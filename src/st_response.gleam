@@ -2,6 +2,8 @@ import gleam/io
 import dotenv
 import gleam/erlang/os
 import gleam/string
+import gleam/result
+import gleam/option
 import gleam/list
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
@@ -74,4 +76,16 @@ pub fn expect_200_body_result(resp: WebResult(value)) -> value {
   |> should.be_ok
   |> expect_status(200)
   |> core.extract_body
+}
+
+pub fn optional_unwrap_field(
+  named field: String,
+  of decoder: dynamic.Decoder(t),
+  or default: t,
+) -> dynamic.Decoder(t) {
+  let optional_field_fun = dynamic.optional_field(field, of: decoder)
+  fn(d: dynamic.Dynamic) {
+    optional_field_fun(d)
+    |> result.map(with: fn(x) { option.unwrap(x, default) })
+  }
 }
