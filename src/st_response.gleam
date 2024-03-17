@@ -83,9 +83,9 @@ pub fn optional_field_with_default(
   of decoder: dynamic.Decoder(t),
   or default: t,
 ) -> dynamic.Decoder(t) {
-  let optional_field_fun = dynamic.optional_field(field, of: decoder)
   fn(d: dynamic.Dynamic) {
-    optional_field_fun(d)
-    |> result.map(with: fn(x) { option.unwrap(x, default) })
+    d
+    |> dynamic.optional_field(field, of: decoder)
+    |> result.map(with: option.unwrap(_, default))
   }
 }
