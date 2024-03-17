@@ -78,7 +78,7 @@ pub fn expect_200_body_result(resp: WebResult(value)) -> value {
   |> core.extract_body
 }
 
-pub fn optional_unwrap_field(
+pub fn optional_field_with_default(
   named field: String,
   of decoder: dynamic.Decoder(t),
   or default: t,

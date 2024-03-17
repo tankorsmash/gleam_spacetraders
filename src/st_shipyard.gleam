@@ -145,31 +145,33 @@ pub type Shipyard {
   )
 }
 
+pub fn decode_ship_type() {
+  dynamic.decode1(ShipType, dynamic.field("type", dynamic.string))
+}
+
+pub fn decode_transaction() {
+  dynamic.decode6(
+    Transaction,
+    dynamic.field("waypointSymbol", dynamic.string),
+    dynamic.field("shipSymbol", dynamic.string),
+    dynamic.field("shipType", dynamic.string),
+    dynamic.field("price", dynamic.int),
+    dynamic.field("agentSymbol", dynamic.string),
+    dynamic.field("timestamp", dynamic.string),
+  )
+}
+
 pub fn decode_shipyard() {
   dynamic.decode5(
     Shipyard,
     dynamic.field("symbol", dynamic.string),
-    dynamic.field(
-      "shipTypes",
-      dynamic.list(dynamic.decode1(
-        ShipType,
-        dynamic.field("type", dynamic.string),
-      )),
-    ),
-    st_response.optional_unwrap_field(
+    dynamic.field("shipTypes", dynamic.list(decode_ship_type())),
+    st_response.optional_field_with_default(
       "transactions",
-      dynamic.list(dynamic.decode6(
-        Transaction,
-        dynamic.field("waypointSymbol", dynamic.string),
-        dynamic.field("shipSymbol", dynamic.string),
-        dynamic.field("shipType", dynamic.string),
-        dynamic.field("price", dynamic.int),
-        dynamic.field("agentSymbol", dynamic.string),
-        dynamic.field("timestamp", dynamic.string),
-      )),
+      dynamic.list(decode_transaction()),
       [],
     ),
-    st_response.optional_unwrap_field(
+    st_response.optional_field_with_default(
       "ships",
       dynamic.list(st_ship.decode_ship()),
       [],
