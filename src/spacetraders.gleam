@@ -59,6 +59,14 @@ fn waypoint_flag() -> flag.FlagBuilder(String) {
   |> flag.description("waypoint symbol")
 }
 
+const traits_flag_name = "traits"
+
+fn traits_flag() -> flag.FlagBuilder(List(String)) {
+  flag.string_list()
+  |> flag.default([])
+  |> flag.description("trait symbols")
+}
+
 fn view_agent(_input: glint.CommandInput) -> String {
   io.println("viewing agent")
   create_client()
@@ -71,9 +79,18 @@ fn view_waypoints(input: glint.CommandInput) -> String {
   io.println("viewing waypints")
   let assert Ok(system_symbol) =
     flag.get_string(from: input.flags, for: system_flag_name)
+
+  let assert Ok(raw_trait_names) =
+    flag.get_strings(input.flags, traits_flag_name)
+  let traits: List(st_waypoint.Trait) =
+    raw_trait_names
+    |> list.map(fn(trait_symbol) {
+      st_waypoint.Trait(string.uppercase(trait_symbol), "", "")
+    })
+
   create_client()
   // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
-  |> st_waypoint.get_waypoints_for_system(system_symbol, [])
+  |> st_waypoint.get_waypoints_for_system(system_symbol, traits)
   // st_waypoint.Trait("SHIPYARD", "", ""),
   |> st_response.expect_200_body_result
   |> st_waypoint.show_traits_for_waypoints
@@ -85,7 +102,6 @@ fn view_shipyard(input: glint.CommandInput) -> String {
     flag.get_string(from: input.flags, for: system_flag_name)
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
-
   io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
   let shipyard =
     create_client()
@@ -152,6 +168,7 @@ pub fn main() {
       at: ["waypoints"],
       do: glint.command(view_waypoints)
         |> glint.flag(system_flag_name, system_flag())
+        |> glint.flag(traits_flag_name, traits_flag())
         |> glint.description("view waypoints for a given system"),
     )
     |> glint.add(
