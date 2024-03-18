@@ -327,6 +327,29 @@ pub fn set_ship_to_orbit(input: glint.CommandInput) -> String {
   // |> string.inspect
 }
 
+pub fn refuel_ship(input: glint.CommandInput) -> String {
+  io.println("refuelling...")
+  let assert Ok(ship_symbol) =
+    flag.get_string(from: input.flags, for: ship_symbol_name)
+
+  io.println("refuelling ship: " <> ship_symbol)
+
+  let resp =
+    create_client()
+    |> st_ship.refuel_ship(ship_symbol)
+
+  let assert Ok(refuel_response) = resp
+
+  case refuel_response.body {
+    // |> st_response.expect_200_body_result,
+    st_ship.RefuelSuccess(agent, fuel, transaction) ->
+      "Refuelled, probably. Agent and fuel and transcation TODO"
+    st_ship.RefuelFailure(message) -> {
+      "Failure: " <> message
+    }
+  }
+}
+
 pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
   io.println("setting ship to orbit")
   let assert Ok(ship_symbol) =
@@ -410,6 +433,12 @@ pub fn main() {
       do: glint.command(set_ship_to_dock)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to dock"),
+    )
+    |> glint.add(
+      at: ["refuel_ship"],
+      do: glint.command(refuel_ship)
+        |> glint.flag(ship_symbol_name, ship_symbol_flag())
+        |> glint.description("refuel docked ship"),
     )
     |> glint.add(
       at: ["waypoints"],

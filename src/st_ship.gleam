@@ -7,11 +7,16 @@ import gleam/list
 import gleam/result
 import gleam/function
 import gleam/json
+import gleam/dict
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 import st_response
+import st_agent
+import st_market
+
+// import st_market
 
 // {
 // 	"symbol": "string",
@@ -641,6 +646,47 @@ pub fn navigate_ship_to_waypoint(
     Json(decoder),
     options: [],
     body: body,
+  )
+}
+
+pub type RefuelResponse {
+  RefuelSuccess(
+    agent: st_agent.Agent,
+    fuel: Fuel,
+    transaction: st_market.MarketTransaction,
+  )
+
+  RefuelFailure(message: String)
+}
+
+pub fn refuel_ship(
+  client: falcon.Client,
+  ship_symbol: String,
+) -> st_response.FalconResult(RefuelResponse) {
+  let success_decoder =
+    dynamic.decode3(
+      RefuelSuccess,
+      dynamic.field("agent", st_agent.decode_agent()),
+      dynamic.field("fuel", decode_fuel()),
+      dynamic.field("transation", st_market.decode_market_transaction()),
+    )
+  let failure_decoder =
+    dynamic.decode1(RefuelFailure, dynamic.field("message", dynamic.string))
+  let decoder = fn(val) {
+    // io.debug(dict.keys(dynamic.unsafe_coerce(val)))
+
+    dynamic.any([
+      dynamic.field("data", success_decoder),
+      dynamic.field("error", failure_decoder),
+    ])(val)
+  }
+
+  client
+  |> falcon.post(
+    "/my/ships/" <> ship_symbol <> "/refuel",
+    Json(decoder),
+    options: [],
+    body: "",
   )
 }
 
