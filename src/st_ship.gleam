@@ -573,16 +573,19 @@ pub fn set_ship_to_orbit(client: falcon.Client, ship_symbol: String) {
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/orbit",
     Json(dynamic.field("data", dynamic.field("nav", decode_nav()))),
-    // Json(st_response.decode_response(dynamic.dynamic)),
-    // Raw(dynamic.dynamic),
     options: [],
     body: "",
   )
-  // |> should.be_ok
-  // |> core.extract_body
-  // |> st_response.extract_data
-  //   |> decode_ships()
-  // |> io.debug
+}
+
+pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
+  client
+  |> falcon.post(
+    "/my/ships/" <> ship_symbol <> "/dock",
+    Json(dynamic.field("data", dynamic.field("nav", decode_nav()))),
+    options: [],
+    body: "",
+  )
 }
 
 pub fn get_ship_waypoint(ship: Ship) -> String {
