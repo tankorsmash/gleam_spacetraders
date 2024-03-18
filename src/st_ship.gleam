@@ -618,7 +618,7 @@ pub fn navigate_chip_to_waypoint(
   client: falcon.Client,
   ship_symbol: String,
   waypoint_symbol: String,
-) {
+) -> st_response.FalconResult(#(Nav, Fuel, List(ShipConditionEvent))) {
   client
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/navigate",
