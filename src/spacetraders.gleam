@@ -38,14 +38,6 @@ fn create_client() -> Client {
 
 const contract_id: String = "clthywl03m46cs60cl8ezck89f"
 
-const view_name = "view"
-
-fn view_flag() -> flag.FlagBuilder(String) {
-  flag.string()
-  |> flag.default("main")
-  |> flag.description("this is a desd")
-}
-
 const system_flag_name = "system"
 
 fn system_flag() -> flag.FlagBuilder(String) {
@@ -152,6 +144,10 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
     <> int.to_string(list.length(ship.cargo.inventory))
     <> "\n Mods: "
     <> string.join(module_names, ", ")
+    <> case ship.nav.status {
+      "DOCKED" | "IN_ORBIT" -> ""
+      _ -> "\n Nav: " <> pretty_nav(ship.nav)
+    }
   }
 
   create_client()
