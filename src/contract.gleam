@@ -111,7 +111,7 @@ pub type AcceptContract {
 pub fn accept_contract(
   client: Client,
   contract_id: String,
-) -> st_response.WebResult(AcceptContract) {
+) -> st_response.FalconResult(AcceptContract) {
   let decoder =
     st_response.decode_data(dynamic.decode2(
       AcceptContract,

@@ -18,7 +18,7 @@ pub type PagedResponse(data) {
   PagedResponse(data: data, meta: Meta)
 }
 
-pub type WebResult(data) =
+pub type FalconResult(data) =
   Result(FalconResponse(data), FalconError)
 
 pub type WebResponse(data) =
@@ -75,7 +75,7 @@ pub fn expect_200_body(resp: WebResponse(value)) -> value {
   |> extract_data
 }
 
-pub fn expect_200_body_result(resp: WebResult(value)) -> value {
+pub fn expect_200_body_result(resp: FalconResult(value)) -> value {
   resp
   |> should.be_ok
   |> expect_status(200)

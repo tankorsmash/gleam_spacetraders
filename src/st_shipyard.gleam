@@ -184,7 +184,7 @@ pub fn view_available_ships(
   client: falcon.Client,
   system_symbol: String,
   waypoint_symbol: String,
-) -> st_response.WebResult(Shipyard) {
+) -> st_response.FalconResult(Shipyard) {
   client
   |> falcon.get(
     "/systems/"
