@@ -112,7 +112,7 @@ fn view_shipyard(input: glint.CommandInput) -> String {
     create_client()
     |> st_shipyard.view_available_ships(system_symbol, waypoint_symbol)
 
-  let qwe = case resp {
+  let _ = case resp {
     Ok(_) -> {
       Nil
     }
@@ -140,8 +140,24 @@ fn view_shipyard(input: glint.CommandInput) -> String {
 
   let ships =
     shipyard.ships
-    |> list.map(fn(ship) { ship.frame.symbol })
-  types <> "\nModification fee: " <> mod_fee <> "\n" <> string.join(ships, ", ")
+    |> list.map(fn(ship) {
+      "- Type: "
+      <> ship.type_
+      <> " Symbol: "
+      <> ship.frame.symbol
+      <> case list.length(ship.modules) {
+        0 -> {
+          ""
+        }
+        _ ->
+          "\n  Mods: "
+          <> string.join(
+            list.map(ship.modules, fn(module) { module.symbol }),
+            ", ",
+          )
+      }
+    })
+  types <> "\nModification fee: " <> mod_fee <> "\n" <> string.join(ships, "\n")
 }
 
 fn view_my_ships(_input: glint.CommandInput) -> String {
