@@ -4,6 +4,7 @@ import gleam/erlang/os
 import gleam/string
 import gleam/result
 import gleam/option
+import gleam/json
 import gleam/list
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
@@ -100,4 +101,13 @@ pub fn optional_field_with_default(
     |> dynamic.optional_field(field, of: decoder)
     |> result.map(with: option.unwrap(_, default))
   }
+}
+
+pub fn string_format_decode_errors(errors: List(dynamic.DecodeError)) -> String {
+  errors
+  |> list.map(fn(e) {
+    e
+    |> string.inspect
+  })
+  |> string.join("\n")
 }

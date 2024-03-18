@@ -111,19 +111,13 @@ fn view_shipyard(input: glint.CommandInput) -> String {
   let resp =
     create_client()
     |> st_shipyard.view_available_ships(system_symbol, waypoint_symbol)
-  io.debug(resp)
 
   let qwe = case resp {
     Ok(_) -> {
       Nil
     }
     Error(core.JsonDecodingError(json.UnexpectedFormat(errors))) -> {
-      errors
-      |> list.map(fn(e) {
-        e
-        |> string.inspect
-      })
-      |> string.join("\n")
+      st_response.string_format_decode_errors(errors)
       |> io.println
     }
     Error(_) -> {
