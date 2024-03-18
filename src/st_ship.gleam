@@ -277,7 +277,7 @@ pub type Mount {
     symbol: String,
     name: String,
     description: String,
-    strength: Int,
+    strength: Option(Int),
     deposits: List(String),
     requirements: Requirements,
   )
@@ -533,7 +533,7 @@ pub fn decode_mount() {
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
-    dynamic.field("strength", dynamic.int),
+    dynamic.optional_field("strength", dynamic.int),
     optional_field_with_default("deposits", dynamic.list(dynamic.string), []),
     dynamic.field("requirements", decode_requirements()),
   )

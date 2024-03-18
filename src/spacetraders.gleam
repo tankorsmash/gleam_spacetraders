@@ -202,9 +202,9 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
   let flight_mode = nav.flight_mode
   let status = nav.status
 
-  case status != "IN_ORBIT" {
-    True -> "Status: " <> status <> " - " <> flight_mode
-    False ->
+  case status {
+    "IN_ORBIT" | "DOCKED" -> "Status: " <> status <> " - " <> flight_mode
+    _ ->
       "Status: "
       <> status
       <> " - "
@@ -213,6 +213,8 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
       <> destination.symbol
       <> " O:"
       <> origin.symbol
+      <> " ETA: "
+      <> route.arrival
   }
 }
 
