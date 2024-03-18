@@ -51,6 +51,14 @@ fn system_flag() -> flag.FlagBuilder(String) {
   |> flag.description("system symbol")
 }
 
+const ship_symbol_name = "ship"
+
+fn ship_symbol_flag() -> flag.FlagBuilder(String) {
+  flag.string()
+  |> flag.default("TANKOR_SMASH-1")
+  |> flag.description("ship symbol")
+}
+
 const waypoint_flag_name = "waypoint"
 
 fn waypoint_flag() -> flag.FlagBuilder(String) {
@@ -153,6 +161,39 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
   }
 }
 
+pub fn set_ship_to_orbit(input: glint.CommandInput) -> String {
+  io.println("setting ship to orbit")
+  let assert Ok(ship_symbol) =
+    flag.get_string(from: input.flags, for: ship_symbol_name)
+  io.println("ship: " <> ship_symbol)
+  let nav =
+    create_client()
+    |> st_ship.set_ship_to_orbit(ship_symbol)
+    |> st_response.expect_200_body_result
+
+  let route = nav.route
+  let destination = route.destination
+  let origin = route.origin
+
+  let flight_mode = nav.flight_mode
+  let status = nav.status
+
+  case status != "IN_ORBIT" {
+    True -> "Status: " <> status <> " - " <> flight_mode
+    False ->
+      "Status: "
+      <> status
+      <> " - "
+      <> flight_mode
+      <> " - D:"
+      <> destination.symbol
+      <> " O:"
+      <> origin.symbol
+  }
+  // nav
+  // |> string.inspect
+}
+
 pub fn main() {
   dotenv.config()
 
@@ -168,6 +209,12 @@ pub fn main() {
     |> glint.add(
       at: ["my_ships"],
       do: glint.command(view_my_ships)
+        |> glint.description("view my ships"),
+    )
+    |> glint.add(
+      at: ["orbit_ship"],
+      do: glint.command(set_ship_to_orbit)
+        |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("view my ships"),
     )
     |> glint.add(
