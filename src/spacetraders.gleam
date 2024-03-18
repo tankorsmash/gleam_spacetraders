@@ -161,16 +161,7 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
   }
 }
 
-pub fn set_ship_to_orbit(input: glint.CommandInput) -> String {
-  io.println("setting ship to orbit")
-  let assert Ok(ship_symbol) =
-    flag.get_string(from: input.flags, for: ship_symbol_name)
-  io.println("ship: " <> ship_symbol)
-  let nav =
-    create_client()
-    |> st_ship.set_ship_to_orbit(ship_symbol)
-    |> st_response.expect_200_body_result
-
+fn pretty_nav(nav: st_ship.Nav) -> String {
   let route = nav.route
   let destination = route.destination
   let origin = route.origin
@@ -190,8 +181,37 @@ pub fn set_ship_to_orbit(input: glint.CommandInput) -> String {
       <> " O:"
       <> origin.symbol
   }
+}
+
+pub fn set_ship_to_orbit(input: glint.CommandInput) -> String {
+  io.println("setting ship to orbit")
+  let assert Ok(ship_symbol) =
+    flag.get_string(from: input.flags, for: ship_symbol_name)
+  io.println("ship: " <> ship_symbol)
+  let nav =
+    create_client()
+    |> st_ship.set_ship_to_orbit(ship_symbol)
+    |> st_response.expect_200_body_result
+  pretty_nav(nav)
   // nav
   // |> string.inspect
+}
+
+pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
+  io.println("setting ship to orbit")
+  let assert Ok(ship_symbol) =
+    flag.get_string(from: input.flags, for: ship_symbol_name)
+  let assert Ok(waypoint_symbol) =
+    flag.get_string(from: input.flags, for: waypoint_flag_name)
+  io.println("ship: " <> ship_symbol)
+  let #(nav, fuel, events) =
+    create_client()
+    |> st_ship.navigate_chip_to_waypoint(ship_symbol, waypoint_symbol)
+    |> st_response.expect_200_body_result
+
+  let nav_string = pretty_nav(nav)
+
+  nav_string <> " + missing fuel + missing events"
 }
 
 pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
@@ -204,25 +224,7 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
     |> st_ship.set_ship_to_dock(ship_symbol)
     |> st_response.expect_200_body_result
 
-  let route = nav.route
-  let destination = route.destination
-  let origin = route.origin
-
-  let flight_mode = nav.flight_mode
-  let status = nav.status
-
-  case status != "IN_ORBIT" {
-    True -> "Status: " <> status <> " - " <> flight_mode
-    False ->
-      "Status: "
-      <> status
-      <> " - "
-      <> flight_mode
-      <> " - D:"
-      <> destination.symbol
-      <> " O:"
-      <> origin.symbol
-  }
+  pretty_nav(nav)
   // nav
   // |> string.inspect
 }
@@ -249,6 +251,13 @@ pub fn main() {
       do: glint.command(set_ship_to_orbit)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to orbit"),
+    )
+    |> glint.add(
+      at: ["navigate_ship"],
+      do: glint.command(set_ship_to_navigate)
+        |> glint.flag(ship_symbol_name, ship_symbol_flag())
+        |> glint.flag(waypoint_flag_name, waypoint_flag())
+        |> glint.description("navigate ship to waypoint"),
     )
     |> glint.add(
       at: ["dock_ship"],

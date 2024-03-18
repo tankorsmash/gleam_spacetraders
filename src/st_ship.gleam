@@ -7,7 +7,7 @@ import gleam/list
 import gleam/result
 import gleam/function
 import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Raw, Url}
+import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 import st_response
@@ -406,6 +406,32 @@ pub fn decode_frame() {
   )
 }
 
+// {
+//   "symbol": "REACTOR_OVERLOAD",
+//   "component": "FRAME",
+//   "name": "string",
+//   "description": "string"
+// }
+
+pub type ShipConditionEvent {
+  ShipConditionEvent(
+    symbol: String,
+    component: String,
+    name: String,
+    description: String,
+  )
+}
+
+pub fn decode_ship_condition_event() {
+  dynamic.decode4(
+    ShipConditionEvent,
+    dynamic.field("symbol", dynamic.string),
+    dynamic.field("component", dynamic.string),
+    dynamic.field("name", dynamic.string),
+    dynamic.field("description", dynamic.string),
+  )
+}
+
 pub fn optional_field_with_default(field_name, decoder, def) {
   fn(value) {
     value
@@ -584,6 +610,28 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
     "/my/ships/" <> ship_symbol <> "/dock",
     Json(dynamic.field("data", dynamic.field("nav", decode_nav()))),
     options: [],
+    body: "",
+  )
+}
+
+pub fn navigate_chip_to_waypoint(
+  client: falcon.Client,
+  ship_symbol: String,
+  waypoint_symbol: String,
+) {
+  client
+  |> falcon.post(
+    "/my/ships/" <> ship_symbol <> "/navigate",
+    Json(dynamic.field(
+      "data",
+      dynamic.decode3(
+        fn(nav, fuel, events) { #(nav, fuel, events) },
+        dynamic.field("nav", decode_nav()),
+        dynamic.field("fuel", decode_fuel()),
+        dynamic.field("events", dynamic.list(decode_ship_condition_event())),
+      ),
+    )),
+    options: [Queries([#("waypointSymbol", waypoint_symbol)])],
     body: "",
   )
 }
