@@ -92,7 +92,7 @@ pub type MarketTradeGood {
     type_: String,
     trade_volume: Int,
     supply: String,
-    activity: String,
+    activity: Option(String),
     purchase_price: Int,
     sell_price: Int,
   )
@@ -157,7 +157,7 @@ pub fn decode_market_trade_good() {
     dynamic.field("type", dynamic.string),
     dynamic.field("tradeVolume", dynamic.int),
     dynamic.field("supply", dynamic.string),
-    dynamic.field("activity", dynamic.string),
+    dynamic.optional_field("activity", dynamic.string),
     dynamic.field("purchasePrice", dynamic.int),
     dynamic.field("sellPrice", dynamic.int),
   )
@@ -172,5 +172,22 @@ pub fn decode_market() {
     dynamic.field("exchange", dynamic.list(decode_market_exchange())),
     dynamic.field("transactions", dynamic.list(decode_market_transaction())),
     dynamic.field("tradeGoods", dynamic.list(decode_market_trade_good())),
+  )
+}
+
+pub fn view_market(
+  client: falcon.Client,
+  system_symbol: String,
+  waypoint_symbol: String,
+) -> st_response.FalconResult(Market) {
+  let decoder = st_response.decode_data(decode_market())
+  let url =
+    "systems/" <> system_symbol <> "/waypoints/" <> waypoint_symbol <> "/market"
+  client
+  |> falcon.get(
+    url,
+    // expecting: Json(fn(val) { decoder(io.debug(val)) }),
+    expecting: Json(decoder),
+    options: [],
   )
 }

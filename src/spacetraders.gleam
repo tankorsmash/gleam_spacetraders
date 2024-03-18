@@ -18,6 +18,7 @@ import st_waypoint
 import st_agent
 import st_ship
 import st_shipyard
+import st_market
 // glint arg parse
 import argv
 import glint
@@ -158,6 +159,38 @@ fn view_shipyard(input: glint.CommandInput) -> String {
       }
     })
   types <> "\nModification fee: " <> mod_fee <> "\n" <> string.join(ships, "\n")
+}
+
+fn view_market(input: glint.CommandInput) -> String {
+  io.println("viewing market")
+  let assert Ok(system_symbol) =
+    flag.get_string(from: input.flags, for: system_flag_name)
+  let assert Ok(waypoint_symbol) =
+    flag.get_string(from: input.flags, for: waypoint_flag_name)
+  io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
+
+  let resp =
+    create_client()
+    |> st_market.view_market(system_symbol, waypoint_symbol)
+
+  let _ = case resp {
+    Ok(_) -> {
+      Nil
+    }
+    Error(core.JsonDecodingError(json.UnexpectedFormat(errors))) -> {
+      st_response.string_format_decode_errors(errors)
+      |> io.println
+    }
+    Error(_) -> {
+      todo
+    }
+  }
+
+  let market =
+    resp
+    |> st_response.expect_200_body_result
+
+  string.inspect(market)
 }
 
 fn view_my_ships(_input: glint.CommandInput) -> String {
@@ -329,6 +362,13 @@ pub fn main() {
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view shipyard for a given waypoint"),
+    )
+    |> glint.add(
+      at: ["market"],
+      do: glint.command(view_market)
+        |> glint.flag(system_flag_name, system_flag())
+        |> glint.flag(waypoint_flag_name, waypoint_flag())
+        |> glint.description("view market for a given waypoint"),
     )
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
       io.println("the returned value is:\n" <> x)
