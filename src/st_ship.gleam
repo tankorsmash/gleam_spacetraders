@@ -6,6 +6,7 @@ import gleam/option.{type Option}
 import gleam/list
 import gleam/result
 import gleam/function
+import gleam/json
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
@@ -614,15 +615,16 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
   )
 }
 
-pub fn navigate_chip_to_waypoint(
+pub fn navigate_ship_to_waypoint(
   client: falcon.Client,
   ship_symbol: String,
   waypoint_symbol: String,
 ) -> st_response.FalconResult(#(Nav, Fuel, List(ShipConditionEvent))) {
-  client
-  |> falcon.post(
-    "/my/ships/" <> ship_symbol <> "/navigate",
-    Json(dynamic.field(
+  let body =
+    json.object([#("waypointSymbol", json.string(waypoint_symbol))])
+    |> json.to_string
+  let decoder = fn(val) {
+    dynamic.field(
       "data",
       dynamic.decode3(
         fn(nav, fuel, events) { #(nav, fuel, events) },
@@ -630,9 +632,15 @@ pub fn navigate_chip_to_waypoint(
         dynamic.field("fuel", decode_fuel()),
         dynamic.field("events", dynamic.list(decode_ship_condition_event())),
       ),
-    )),
-    options: [Queries([#("waypointSymbol", waypoint_symbol)])],
-    body: "",
+    )(io.debug(val))
+  }
+
+  client
+  |> falcon.post(
+    "/my/ships/" <> ship_symbol <> "/navigate",
+    Json(decoder),
+    options: [],
+    body: body,
   )
 }
 

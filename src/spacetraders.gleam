@@ -27,7 +27,10 @@ fn create_client() -> Client {
   let client =
     falcon.new(
       base_url: Url("https://api.spacetraders.io/v2/"),
-      headers: [#("Authorization", "Bearer " <> token)],
+      headers: [
+        #("Authorization", "Bearer " <> token),
+        #("Content-Type", "application/json"),
+      ],
       timeout: falcon.default_timeout,
     )
   client
@@ -201,17 +204,33 @@ pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
   io.println("setting ship to orbit")
   let assert Ok(ship_symbol) =
     flag.get_string(from: input.flags, for: ship_symbol_name)
+
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
-  io.println("ship: " <> ship_symbol)
-  let #(nav, fuel, events) =
+  io.println(
+    "navigating ship: " <> ship_symbol <> " to waypoint: " <> waypoint_symbol,
+  )
+
+  let resp =
     create_client()
-    |> st_ship.navigate_chip_to_waypoint(ship_symbol, waypoint_symbol)
+    |> st_ship.navigate_ship_to_waypoint(ship_symbol, waypoint_symbol)
+
+  let #(nav, fuel, events) =
+    io.debug(resp)
     |> st_response.expect_200_body_result
 
   let nav_string = pretty_nav(nav)
+  let fuel_string =
+    "Fuel: "
+    <> int.to_string(fuel.current)
+    <> "/"
+    <> int.to_string(fuel.capacity)
 
-  nav_string <> " + missing fuel + missing events"
+  let event_string =
+    events
+    |> list.map(fn(event) { event.name <> " " <> event.description })
+    |> string.join(", ")
+  nav_string <> " " <> fuel_string <> " Events: " <> event_string
 }
 
 pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
