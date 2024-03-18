@@ -198,15 +198,25 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
 
   let ship_formatter = fn(ship: st_ship.Ship) {
     let module_names = list.map(ship.modules, fn(m: st_ship.Module) { m.name })
+    let fuel_string =
+      "Fuel: "
+      <> int.to_string(ship.fuel.current)
+      <> "/"
+      <> int.to_string(ship.fuel.capacity)
+      <> " (Consumed: "
+      <> int.to_string(ship.fuel.consumed.amount)
+      <> ")"
     let symbol = ship.symbol
     symbol
     <> " ("
     <> ship.frame.name
     <> ")"
-    <> " -- Nav: "
+    <> " -- @"
     <> ship.nav.waypoint_symbol
-    <> " - "
+    <> ", "
     <> ship.nav.status
+    <> " -- "
+    <> fuel_string
     <> "\n Inv: "
     <> int.to_string(list.length(ship.cargo.inventory))
     <> "\n Mods: "
