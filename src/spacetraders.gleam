@@ -6,6 +6,7 @@ import gleam/string
 import gleam/list
 import gleam/int
 import gleam/bool
+import gleam/json
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
@@ -106,9 +107,32 @@ fn view_shipyard(input: glint.CommandInput) -> String {
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
   io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
-  let shipyard =
+
+  let resp =
     create_client()
     |> st_shipyard.view_available_ships(system_symbol, waypoint_symbol)
+  io.debug(resp)
+
+  let qwe = case resp {
+    Ok(_) -> {
+      Nil
+    }
+    Error(core.JsonDecodingError(json.UnexpectedFormat(errors))) -> {
+      errors
+      |> list.map(fn(e) {
+        e
+        |> string.inspect
+      })
+      |> string.join("\n")
+      |> io.println
+    }
+    Error(_) -> {
+      todo
+    }
+  }
+
+  let shipyard =
+    resp
     |> st_response.expect_200_body_result
 
   let types =

@@ -140,9 +140,68 @@ pub type Shipyard {
     symbol: String,
     ship_types: List(ShipType),
     transactions: List(Transaction),
-    ships: List(st_ship.Ship),
+    ships: List(ShipyardShip),
     modifications_fee: Int,
   )
+}
+
+pub type ShipyardCrew {
+  ShipyardCrew(required: Int, capacity: Int)
+}
+
+pub fn decode_shipyard_crew() {
+  dynamic.decode2(
+    ShipyardCrew,
+    dynamic.field("required", dynamic.int),
+    dynamic.field("capacity", dynamic.int),
+  )
+}
+
+pub type ShipyardShip {
+  ShipyardShip(
+    type_: String,
+    name: String,
+    description: String,
+    supply: String,
+    activity: String,
+    purchase_price: Int,
+    frame: st_ship.Frame,
+    reactor: st_ship.Reactor,
+    engine: st_ship.Engine,
+    modules: List(st_ship.Module),
+    mounts: List(st_ship.Mount),
+    crew: ShipyardCrew,
+  )
+}
+
+pub fn decode_shipyard_ship() {
+  fn(val) {
+    let triple_decoder =
+      dynamic.decode3(
+        fn(t, n, d) { #(t, n, d) },
+        dynamic.field("type", dynamic.string),
+        dynamic.field("name", dynamic.string),
+        dynamic.field("description", dynamic.string),
+      )
+    use #(type_, name, description) <- result.try(triple_decoder(val))
+
+    use res <- result.map(dynamic.decode9(
+      fn(d, a, p, f, r, e, mo, moun, crew) {
+        ShipyardShip(type_, name, description, d, a, p, f, r, e, mo, moun, crew)
+      },
+      dynamic.field("supply", dynamic.string),
+      dynamic.field("activity", dynamic.string),
+      dynamic.field("purchasePrice", dynamic.int),
+      dynamic.field("frame", st_ship.decode_frame()),
+      dynamic.field("reactor", st_ship.decode_reactor()),
+      dynamic.field("engine", st_ship.decode_engine()),
+      dynamic.field("modules", dynamic.list(st_ship.decode_module())),
+      dynamic.field("mounts", dynamic.list(st_ship.decode_mount())),
+      dynamic.field("crew", decode_shipyard_crew()),
+    )(val))
+
+    res
+  }
 }
 
 pub fn decode_ship_type() {
@@ -173,7 +232,7 @@ pub fn decode_shipyard() {
     ),
     st_response.optional_field_with_default(
       "ships",
-      dynamic.list(st_ship.decode_ship()),
+      dynamic.list(decode_shipyard_ship()),
       [],
     ),
     dynamic.field("modificationsFee", dynamic.int),
@@ -192,7 +251,7 @@ pub fn view_available_ships(
       <> "/waypoints/"
       <> waypoint_symbol
       <> "/shipyard",
-    Json(fn(val) { dynamic.field("data", decode_shipyard())(val) }),
+    Json(fn(val) { dynamic.field("data", decode_shipyard())(io.debug(val)) }),
     // Json(st_response.decode_response(dynamic.dynamic)),
     // Raw(dynamic.dynamic),
     [],
