@@ -24,7 +24,7 @@ import argv
 import glint
 import glint/flag
 
-fn create_client() -> Client {
+pub fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
   let client =
     falcon.new(
@@ -338,14 +338,22 @@ pub fn refuel_ship(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.refuel_ship(ship_symbol)
 
-  let assert Ok(refuel_response) = resp
+  // let assert Ok(refuel_response) = resp
 
-  case refuel_response.body {
-    // |> st_response.expect_200_body_result,
-    st_ship.RefuelSuccess(agent, fuel, transaction) ->
-      "Refuelled, probably. Agent and fuel and transcation TODO"
-    st_ship.RefuelFailure(message) -> {
-      "Failure: " <> message
+  case resp {
+    Ok(refuel_response) -> {
+      case refuel_response.body {
+        // |> st_response.expect_200_body_result,
+        st_ship.RefuelSuccess(agent, fuel, transaction) ->
+          "Refuelled, probably. Agent and fuel and transcation TODO"
+        st_ship.RefuelFailure(message) -> {
+          "Failure: " <> message
+        }
+      }
+    }
+    Error(error) -> {
+      io.debug(error)
+      "unknown error"
     }
   }
 }
@@ -398,8 +406,14 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
   // |> string.inspect
 }
 
+pub fn test_halo() {
+  io.println("hooo")
+}
+
 pub fn main() {
   dotenv.config()
+
+  test_halo()
 
   let _ =
     glint.new()

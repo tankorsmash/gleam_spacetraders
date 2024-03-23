@@ -653,7 +653,7 @@ pub type RefuelResponse {
   RefuelSuccess(
     agent: st_agent.Agent,
     fuel: Fuel,
-    transaction: st_market.MarketTransaction,
+    transaction: Option(st_market.MarketTransaction),
   )
 
   RefuelFailure(message: String)
@@ -668,23 +668,29 @@ pub fn refuel_ship(
       RefuelSuccess,
       dynamic.field("agent", st_agent.decode_agent()),
       dynamic.field("fuel", decode_fuel()),
-      dynamic.field("transation", st_market.decode_market_transaction()),
+      dynamic.optional_field(
+        "transation",
+        st_market.decode_market_transaction(),
+      ),
     )
   let failure_decoder =
     dynamic.decode1(RefuelFailure, dynamic.field("message", dynamic.string))
-  let decoder = fn(val) {
-    // io.debug(dict.keys(dynamic.unsafe_coerce(val)))
+  // let decoder = fn(val) {
+  //   // io.debug(dict.keys(dynamic.unsafe_coerce(val)))
+  //   // io.debug(dict.get(dynamic.unsafe_coerce(val), "data"))
+  //   // io.debug(val)
 
-    dynamic.any([
-      dynamic.field("data", success_decoder),
-      dynamic.field("error", failure_decoder),
-    ])(val)
-  }
+  //   dynamic.any([
+  //     dynamic.field("data", success_decoder),
+  //     dynamic.field("error", failure_decoder),
+  //   ])(val)
+  // }
 
   client
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/refuel",
-    Json(decoder),
+    // Json(decoder),
+    Json(dynamic.field("data", success_decoder)),
     options: [],
     body: "",
   )
