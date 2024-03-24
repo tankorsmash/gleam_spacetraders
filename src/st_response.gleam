@@ -25,6 +25,19 @@ pub type FalconResult(data) =
 pub type WebResponse(data) =
   Result(FalconResponse(PagedResponse(data)), FalconError)
 
+pub type ApiError(data) {
+  ApiError(status: Int, message: String, data: data)
+}
+
+// pub fn decode_error() {
+//   dynamic.decode3(
+//     ApiError,
+//     dynamic.field("status", dynamic.int),
+//     dynamic.field("message", dynamic.string),
+//     dynamic.field("data", dynamic.anything),
+//   )
+// }
+
 pub fn decode_meta() {
   dynamic.decode3(
     Meta,
@@ -74,6 +87,21 @@ pub fn expect_200_body(resp: WebResponse(value)) -> value {
   |> expect_status(200)
   |> core.extract_body
   |> extract_data
+}
+
+pub fn expect_body(resp: WebResponse(value)) -> value {
+  resp
+  |> should.be_ok
+  // |> expect_status(200)
+  |> core.extract_body
+  |> extract_data
+}
+
+pub fn expect_body_result(resp: FalconResult(value)) -> value {
+  resp
+  |> should.be_ok
+  // |> expect_status(200)
+  |> core.extract_body
 }
 
 pub fn expect_200_body_result(resp: FalconResult(value)) -> value {

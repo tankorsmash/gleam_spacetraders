@@ -445,10 +445,9 @@ pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.navigate_ship_to_waypoint(ship_symbol, waypoint_symbol)
 
-  // let #(nav, fuel, events) =
   case
     resp
-    |> st_response.expect_200_body_result
+    |> st_response.expect_body_result
   {
     st_ship.NavigateSuccess(nav, fuel, events) -> {
       let nav_string = pretty_nav(nav)
@@ -464,8 +463,8 @@ pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
         |> string.join(", ")
       nav_string <> " " <> fuel_string <> " Events: " <> event_string
     }
-    st_ship.NavigateFailure(message) -> {
-      "Navigation failed: " <> message
+    st_ship.NavigateFailure(error) -> {
+      "Navigation failed: " <> error.message
     }
   }
 }

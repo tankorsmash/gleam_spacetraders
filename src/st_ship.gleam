@@ -615,7 +615,7 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
 
 pub type NavigateResponse {
   NavigateSuccess(nav: Nav, fuel: Fuel, events: List(ShipConditionEvent))
-  NavigateFailure(message: String)
+  NavigateFailure(error: st_response.ApiError(dynamic.Dynamic))
 }
 
 pub fn navigate_ship_to_waypoint(
@@ -627,6 +627,7 @@ pub fn navigate_ship_to_waypoint(
     json.object([#("waypointSymbol", json.string(waypoint_symbol))])
     |> json.to_string
   let success_decoder = fn(val) {
+    // glam_json.json_to_doc(val)|>doc_
     dynamic.field(
       "data",
       dynamic.decode3(
@@ -639,9 +640,14 @@ pub fn navigate_ship_to_waypoint(
   }
 
   let failure_decoder = fn(val) {
-    dynamic.decode1(NavigateFailure, dynamic.field("message", dynamic.string))(
-      val,
+    val
+    |> dynamic.decode3(
+      st_response.ApiError,
+      dynamic.field("error", dynamic.field("code", dynamic.int)),
+      dynamic.field("error", dynamic.field("message", dynamic.string)),
+      dynamic.field("error", dynamic.field("data", dynamic.dynamic)),
     )
+    |> result.map(NavigateFailure)
   }
 
   let decoder = dynamic.any([success_decoder, failure_decoder])
