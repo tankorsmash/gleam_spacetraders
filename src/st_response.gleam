@@ -11,19 +11,19 @@ import falcon/core.{Json, Raw, Url}
 import gleam/dynamic
 import gleeunit/should
 
+pub type FalconResult(data) =
+  Result(FalconResponse(data), FalconError)
+
 pub type Meta {
   Meta(total: Int, page: Int, limit: Int)
 }
 
-pub type PagedResponse(data) {
-  PagedResponse(data: data, meta: Meta)
+pub type PagedApiData(data) {
+  PagedApiData(data: data, meta: Meta)
 }
 
-pub type FalconResult(data) =
-  Result(FalconResponse(data), FalconError)
-
-pub type WebResponse(data) =
-  Result(FalconResponse(PagedResponse(data)), FalconError)
+pub type PagedApiResponse(data) =
+  FalconResult(PagedApiData(data))
 
 pub type ApiError(data) {
   ApiError(status: Int, message: String, data: data)
@@ -49,7 +49,7 @@ pub fn decode_meta() {
 
 pub fn decode_paged_response(field_decoder) {
   dynamic.decode2(
-    PagedResponse,
+    PagedApiData,
     dynamic.field("data", field_decoder),
     dynamic.field("meta", decode_meta()),
   )
@@ -59,15 +59,15 @@ pub fn decode_data(field_decoder) {
   dynamic.field("data", field_decoder)
 }
 
-pub fn extract_data(resp: PagedResponse(data)) -> data {
+pub fn extract_data(resp: PagedApiData(data)) -> data {
   resp.data
 }
 
-pub fn extract_meta(resp: PagedResponse(data)) -> Meta {
+pub fn extract_meta(resp: PagedApiData(data)) -> Meta {
   resp.meta
 }
 
-pub fn force_body_response_data(resp: WebResponse(data)) -> data {
+pub fn force_body_response_data(resp: PagedApiResponse(data)) -> data {
   resp
   |> should.be_ok
   |> core.extract_body
@@ -81,7 +81,7 @@ pub fn expect_status(status: Int) {
   }
 }
 
-pub fn expect_200_body(resp: WebResponse(value)) -> value {
+pub fn expect_200_body(resp: PagedApiResponse(value)) -> value {
   resp
   |> should.be_ok
   |> expect_status(200)
@@ -89,7 +89,7 @@ pub fn expect_200_body(resp: WebResponse(value)) -> value {
   |> extract_data
 }
 
-pub fn expect_body(resp: WebResponse(value)) -> value {
+pub fn expect_body(resp: PagedApiResponse(value)) -> value {
   resp
   |> should.be_ok
   // |> expect_status(200)
@@ -111,7 +111,7 @@ pub fn expect_200_body_result(resp: FalconResult(value)) -> value {
   |> core.extract_body
 }
 
-pub fn expect_200_meta(resp: WebResponse(value)) -> Meta {
+pub fn expect_200_meta(resp: PagedApiResponse(value)) -> Meta {
   resp
   |> should.be_ok
   |> expect_status(200)

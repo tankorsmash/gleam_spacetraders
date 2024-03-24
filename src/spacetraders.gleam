@@ -124,16 +124,22 @@ fn view_waypoints(input: glint.CommandInput) -> String {
     }
     Error(_) -> option.None
   }
-  create_client()
-  // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
-  |> st_waypoint.get_waypoints_for_system(
-    system_symbol,
-    waypoint_type: waypoint_type,
-    traits: traits,
-  )
+
+  let resp =
+    create_client()
+    // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
+    |> st_waypoint.get_waypoints_for_system(
+      system_symbol,
+      waypoint_type: waypoint_type,
+      traits: traits,
+    )
+    |> st_response.expect_body_result
   // st_waypoint.Trait("SHIPYARD", "", ""),
-  |> st_response.expect_200_body_result
-  |> st_waypoint.show_traits_for_waypoints
+  case resp {
+    waypoints -> {
+      st_waypoint.show_traits_for_waypoints(waypoints)
+    }
+  }
 }
 
 fn view_shipyard(input: glint.CommandInput) -> String {

@@ -83,13 +83,13 @@ pub fn decode_meta() {
 
 pub fn decode_contract_response() {
   dynamic.decode2(
-    st_response.PagedResponse,
+    st_response.PagedApiData,
     dynamic.field("data", dynamic.list(decode_contract())),
     dynamic.field("meta", decode_meta()),
   )
 }
 
-pub fn get_my_contracts(client) -> st_response.WebResponse(List(Contract)) {
+pub fn get_my_contracts(client) -> st_response.PagedApiResponse(List(Contract)) {
   client
   |> falcon.get(
     "/my/contracts",
