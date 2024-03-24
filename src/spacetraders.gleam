@@ -23,6 +23,8 @@ import st_market
 import argv
 import glint
 import glint/flag
+import birl
+import birl/duration
 
 pub fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
@@ -54,6 +56,14 @@ fn ship_symbol_flag() -> flag.FlagBuilder(String) {
   flag.string()
   |> flag.default("TANKOR_SMASH-1")
   |> flag.description("ship symbol")
+}
+
+const ship_type_name = "ship_type"
+
+fn ship_type_flag() -> flag.FlagBuilder(String) {
+  flag.string()
+  // |> flag.default("TANKOR_SMASH-1")
+  |> flag.description("ship type, ie SHIP_MINING_DRONE")
 }
 
 const waypoint_flag_name = "waypoint"
@@ -277,6 +287,7 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
       "DOCKED" | "IN_ORBIT" -> ""
       _ -> "\n Nav: " <> pretty_nav(ship.nav)
     }
+    <> "\n"
   }
 
   create_client()
@@ -297,9 +308,15 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
   let flight_mode = nav.flight_mode
   let status = nav.status
 
+  let now = birl.now()
+  let assert Ok(arrival) = birl.parse(route.arrival)
   case status {
     "IN_ORBIT" | "DOCKED" -> "Status: " <> status <> " - " <> flight_mode
-    _ ->
+    _ -> {
+      let qwe =
+        birl.difference(arrival, now)
+        |> duration.decompose
+        |> string.inspect
       "Status: "
       <> status
       <> " - "
@@ -308,8 +325,11 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
       <> destination.symbol
       <> " O:"
       <> origin.symbol
-      <> " ETA: "
+      <> "\nETA: "
       <> route.arrival
+      <> "in "
+      <> qwe
+    }
   }
 }
 
@@ -350,6 +370,34 @@ pub fn refuel_ship(input: glint.CommandInput) -> String {
           "Failure: " <> message
         }
       }
+    }
+    Error(error) -> {
+      io.debug(error)
+      "unknown error"
+    }
+  }
+}
+
+pub fn purchase_ship(input: glint.CommandInput) -> String {
+  io.println("purchasingg...")
+  let assert Ok(ship_type) =
+    flag.get_string(from: input.flags, for: ship_type_name)
+
+  let assert Ok(waypoint_symbol) =
+    flag.get_string(from: input.flags, for: waypoint_flag_name)
+
+  io.println("purchasing ship type: " <> ship_type)
+
+  let resp =
+    create_client()
+    |> st_ship.purchase_ship(waypoint_symbol, ship_type)
+
+  // let assert Ok(purchase_response) = resp
+
+  case resp {
+    Ok(purchase_response) -> {
+      let response = io.debug(purchase_response)
+      ""
     }
     Error(error) -> {
       io.debug(error)
@@ -406,14 +454,8 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
   // |> string.inspect
 }
 
-pub fn test_halo() {
-  io.println("hooo")
-}
-
 pub fn main() {
   dotenv.config()
-
-  test_halo()
 
   let _ =
     glint.new()
@@ -453,6 +495,13 @@ pub fn main() {
       do: glint.command(refuel_ship)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("refuel docked ship"),
+    )
+    |> glint.add(
+      at: ["purchase_ship"],
+      do: glint.command(purchase_ship)
+        |> glint.flag(waypoint_flag_name, waypoint_flag())
+        |> glint.flag(ship_type_name, ship_type_flag())
+        |> glint.description("purchase ship"),
     )
     |> glint.add(
       at: ["waypoints"],

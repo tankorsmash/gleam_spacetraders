@@ -17,6 +17,7 @@ simplifile = "~> 1.5"
 glint = "~> 0.18"
 argv = "~> 1.0"
 halo = { path = "../halo_fork_gleam_34" }
+birl = "~> 1.6"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"

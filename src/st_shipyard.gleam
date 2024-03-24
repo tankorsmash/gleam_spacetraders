@@ -13,6 +13,8 @@ import gleeunit/should
 import st_response
 import st_ship
 
+pub const purchase_ship = st_ship.purchase_ship
+
 // {
 //   "data": {
 //     "symbol": "string",
@@ -256,4 +258,11 @@ pub fn view_available_ships(
     // Raw(dynamic.dynamic),
     [],
   )
+}
+
+pub fn debug_decoder(decoder) {
+  fn(val) {
+    io.debug(val)
+    decoder(val)
+  }
 }

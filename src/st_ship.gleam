@@ -699,3 +699,114 @@ pub fn refuel_ship(
 pub fn get_ship_waypoint(ship: Ship) -> String {
   ship.nav.waypoint_symbol
 }
+
+// "transaction": {
+//   "waypointSymbol": "string",
+//   "shipSymbol": "string",
+//   "shipType": "string",
+//   "price": 0,
+//   "agentSymbol": "string",
+//   "timestamp": "2019-08-24T14:15:22Z"
+// }
+
+pub type ShipTransaction {
+  ShipTransaction(
+    waypoint_symbol: String,
+    ship_symbol: String,
+    ship_type: String,
+    price: Int,
+    agent_symbol: String,
+    timestamp: String,
+  )
+}
+
+pub fn decode_ship_transaction() {
+  dynamic.decode6(
+    ShipTransaction,
+    dynamic.field("waypointSymbol", dynamic.string),
+    dynamic.field("shipSymbol", dynamic.string),
+    dynamic.field("shipType", dynamic.string),
+    dynamic.field("price", dynamic.int),
+    dynamic.field("agentSymbol", dynamic.string),
+    dynamic.field("timestamp", dynamic.string),
+  )
+}
+
+pub type ShipType {
+  ShipProbe
+  ShipMiningDrone
+  ShipSiphonDrone
+  ShipInterceptor
+  ShipLightHauler
+  ShipCommandFrigate
+  ShipExplorer
+  ShipHeavyFreighter
+  ShipLightShuttle
+  ShipOreHound
+  ShipRefiningFreighter
+  ShipSurveyor
+}
+
+pub fn decode_ship_type() {
+  fn(val) {
+    use raw_ship_type <- result.try(dynamic.string(val))
+
+    case raw_ship_type {
+      "SHIP_PROBE" -> Ok(ShipProbe)
+      "SHIP_MINING_DRONE" -> Ok(ShipMiningDrone)
+      "SHIP_SIPHON_DRONE" -> Ok(ShipSiphonDrone)
+      "SHIP_INTERCEPTOR" -> Ok(ShipInterceptor)
+      "SHIP_LIGHT_HAULER" -> Ok(ShipLightHauler)
+      "SHIP_COMMAND_FRIGATE" -> Ok(ShipCommandFrigate)
+      "SHIP_EXPLORER" -> Ok(ShipExplorer)
+      "SHIP_HEAVY_FREIGHTER" -> Ok(ShipHeavyFreighter)
+      "SHIP_LIGHT_SHUTTLE" -> Ok(ShipLightShuttle)
+      "SHIP_ORE_HOUND" -> Ok(ShipOreHound)
+      "SHIP_REFINING_FREIGHTER" -> Ok(ShipRefiningFreighter)
+      "SHIP_SURVEYOR" -> Ok(ShipSurveyor)
+      _ ->
+        Error([
+          dynamic.DecodeError(
+            expected: "SHIP_PROBE etc",
+            found: raw_ship_type,
+            path: ["idk"],
+          ),
+        ])
+    }
+  }
+}
+
+// type PurchaseShipError
+
+pub fn purchase_ship(
+  client: falcon.Client,
+  waypoint_symbol: String,
+  ship_type: String,
+) -> st_response.FalconResult(#(st_agent.Agent, Ship, ShipTransaction)) {
+  let body =
+    json.object([
+      #("waypointSymbol", json.string(waypoint_symbol)),
+      #("shipType", json.string(ship_type)),
+    ])
+    |> json.to_string
+
+  let valid_decoder = fn() {
+    dynamic.field(
+      "data",
+      dynamic.decode3(
+        fn(agent, ship, transaction) { #(agent, ship, transaction) },
+        dynamic.field("agent", st_agent.decode_agent()),
+        dynamic.field("ship", decode_ship()),
+        dynamic.field(
+          "data",
+          dynamic.field("transation", decode_ship_transaction()),
+        ),
+      ),
+    )
+  }
+  // let invalid_ship_type_decoder = fn() {
+  //   dynamic.field("error", dynamic.string)
+  // }
+  client
+  |> falcon.post("/my/ships/", Json(valid_decoder()), options: [], body: body)
+}
