@@ -4,6 +4,7 @@ import dotenv
 import gleam/erlang/os
 import gleam/string
 import gleam/list
+import gleam/option
 import gleam/int
 import gleam/json
 import gleam/dynamic
@@ -73,6 +74,14 @@ fn waypoint_flag() -> flag.FlagBuilder(String) {
   |> flag.description("waypoint symbol")
 }
 
+const waypoint_type_flag_name = "waypoint_type"
+
+fn waypoint_type_flag() -> flag.FlagBuilder(String) {
+  flag.string()
+  |> flag.description("waypoint type")
+  |> flag.constraint(constraint.one_of(st_waypoint.all_raw_waypoint_types))
+}
+
 const traits_flag_name = "traits"
 
 fn traits_flag() -> flag.FlagBuilder(List(String)) {
@@ -101,10 +110,19 @@ fn view_waypoints(input: glint.CommandInput) -> String {
     |> list.map(fn(trait_symbol) {
       st_waypoint.Trait(string.uppercase(trait_symbol), "", "")
     })
+  let assert Ok(raw_waypoint_type) =
+    flag.get_string(input.flags, waypoint_type_flag_name)
+  let assert Ok(waypoint_type) =
+    dynamic.from(raw_waypoint_type)
+    |> st_response.debug_decoder(st_waypoint.decode_waypoint_type()(_))
 
   create_client()
   // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
-  |> st_waypoint.get_waypoints_for_system(system_symbol, traits)
+  |> st_waypoint.get_waypoints_for_system(
+    system_symbol,
+    waypoint_type: option.Some(waypoint_type),
+    traits: traits,
+  )
   // st_waypoint.Trait("SHIPYARD", "", ""),
   |> st_response.expect_200_body_result
   |> st_waypoint.show_traits_for_waypoints
@@ -514,6 +532,7 @@ pub fn main() {
       do: glint.command(view_waypoints)
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(traits_flag_name, traits_flag())
+        |> glint.flag(waypoint_type_flag_name, waypoint_type_flag())
         |> glint.description("view waypoints for a given system"),
     )
     |> glint.add(

@@ -2,6 +2,7 @@ import gleam/string
 import gleam/option.{type Option}
 import gleam/result
 import gleam/list
+import gleam/io
 import gleam/json
 import falcon
 import falcon/core.{Json, Queries}
@@ -57,7 +58,7 @@ pub fn decode_waypoint_type() {
   }
 }
 
-pub fn encode_waypoint_type(waypoint_type: WaypointType) -> json.Json {
+pub fn encode_waypoint_type_to_string(waypoint_type: WaypointType) -> String {
   case waypoint_type {
     Planet -> "PLANET"
     GasGiant -> "GAS_GIANT"
@@ -74,6 +75,10 @@ pub fn encode_waypoint_type(waypoint_type: WaypointType) -> json.Json {
     ArtificialGravityWell -> "ARTIFICIAL_GRAVITY_WELL"
     FuelStation -> "FUEL_STATION"
   }
+}
+
+pub fn encode_waypoint_type(waypoint_type: WaypointType) -> json.Json {
+  encode_waypoint_type_to_string(waypoint_type)
   |> json.string
 }
 
@@ -286,11 +291,14 @@ pub fn decode_chart() {
 
 pub fn get_waypoints_for_system(
   client: falcon.Client,
-  system_symbol: String,
-  traits: List(Trait),
+  system_symbol system_symbol: String,
+  waypoint_type waypoint_type: Option(WaypointType),
+  traits traits: List(Trait),
 ) -> st_response.FalconResult(List(Waypoint)) {
   let decoder = st_response.decode_data(dynamic.list(decode_waypoint()))
+
   let url = "systems/" <> system_symbol <> "/waypoints"
+
   client
   |> falcon.get(
     url,
@@ -301,6 +309,10 @@ pub fn get_waypoints_for_system(
           "traits",
           string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
         ),
+        #("type", case waypoint_type {
+          option.Some(t) -> encode_waypoint_type_to_string(t)
+          option.None -> ""
+        }),
         #("limit", "20"),
       ]),
     ],
