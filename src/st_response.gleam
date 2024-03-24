@@ -29,14 +29,14 @@ pub type ApiError(data) {
   ApiError(status: Int, message: String, data: data)
 }
 
-// pub fn decode_error() {
-//   dynamic.decode3(
-//     ApiError,
-//     dynamic.field("status", dynamic.int),
-//     dynamic.field("message", dynamic.string),
-//     dynamic.field("data", dynamic.anything),
-//   )
-// }
+pub fn decode_api_error() {
+  dynamic.decode3(
+    ApiError,
+    dynamic.field("error", dynamic.field("code", dynamic.int)),
+    dynamic.field("error", dynamic.field("message", dynamic.string)),
+    dynamic.field("error", dynamic.field("data", dynamic.dynamic)),
+  )
+}
 
 pub fn decode_meta() {
   dynamic.decode3(

@@ -641,12 +641,7 @@ pub fn navigate_ship_to_waypoint(
 
   let failure_decoder = fn(val) {
     val
-    |> dynamic.decode3(
-      st_response.ApiError,
-      dynamic.field("error", dynamic.field("code", dynamic.int)),
-      dynamic.field("error", dynamic.field("message", dynamic.string)),
-      dynamic.field("error", dynamic.field("data", dynamic.dynamic)),
-    )
+    |> st_response.decode_api_error()
     |> result.map(NavigateFailure)
   }
 
