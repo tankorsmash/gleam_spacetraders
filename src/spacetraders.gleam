@@ -131,8 +131,8 @@ fn view_waypoints(input: glint.CommandInput) -> String {
     create_client()
     |> st_waypoint.get_waypoints_for_system(
       system_symbol,
-      waypoint_type: waypoint_type,
-      traits: traits,
+      waypoint_type: io.debug(waypoint_type),
+      traits: io.debug(traits),
     )
     |> st_response.expect_body_result
   case resp {

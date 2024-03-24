@@ -482,20 +482,25 @@ pub fn get_waypoints_for_system(
   |> falcon.get(
     url,
     expecting: Json(
-      st_response.debug_decoder(st_response.decode_api_response(decoder)),
+      decoder
+      |> st_response.decode_api_response,
     ),
     options: [
-      Queries([
-        #(
-          "traits",
-          string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
-        ),
-        #("type", case waypoint_type {
-          option.Some(t) -> encode_waypoint_type_to_string(t)
-          option.None -> ""
-        }),
-        #("limit", "20"),
-      ]),
+      Queries(
+        list.concat([
+          [
+            #(
+              "traits",
+              string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
+            ),
+            #("limit", "20"),
+          ],
+          case waypoint_type {
+            option.Some(t) -> [#("type", encode_waypoint_type_to_string(t))]
+            option.None -> []
+          },
+        ]),
+      ),
     ],
   )
 }
