@@ -5,6 +5,7 @@ import gleam/erlang/os
 import gleam/string
 import gleam/list
 import gleam/option
+import gleam/result
 import gleam/int
 import gleam/json
 import gleam/dynamic
@@ -110,17 +111,24 @@ fn view_waypoints(input: glint.CommandInput) -> String {
     |> list.map(fn(trait_symbol) {
       st_waypoint.Trait(string.uppercase(trait_symbol), "", "")
     })
-  let assert Ok(raw_waypoint_type) =
-    flag.get_string(input.flags, waypoint_type_flag_name)
-  let assert Ok(waypoint_type) =
-    dynamic.from(raw_waypoint_type)
-    |> st_response.debug_decoder(st_waypoint.decode_waypoint_type()(_))
+  let raw_waypoint_type = flag.get_string(input.flags, waypoint_type_flag_name)
 
+  let waypoint_type: option.Option(st_waypoint.WaypointType) = case
+    raw_waypoint_type
+  {
+    Ok(raw_waypoint_type) -> {
+      dynamic.from(raw_waypoint_type)
+      |> st_response.debug_decoder(st_waypoint.decode_waypoint_type()(_))
+      |> option.from_result()
+      // |> result.replace_error(option.None)
+    }
+    Error(_) -> option.None
+  }
   create_client()
   // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
   |> st_waypoint.get_waypoints_for_system(
     system_symbol,
-    waypoint_type: option.Some(waypoint_type),
+    waypoint_type: waypoint_type,
     traits: traits,
   )
   // st_waypoint.Trait("SHIPYARD", "", ""),
