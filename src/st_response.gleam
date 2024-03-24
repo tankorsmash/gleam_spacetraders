@@ -26,7 +26,7 @@ pub type PagedApiResponse(data) =
   FalconResult(PagedApiData(data))
 
 pub type ApiError(data) {
-  ApiError(status: Int, message: String, data: data)
+  ApiError(status: Int, message: String, data: option.Option(data))
 }
 
 /// the Ok result will be either the decoder we want, or the generic ApiError type
@@ -38,7 +38,7 @@ pub fn decode_api_error() {
     ApiError,
     dynamic.field("error", dynamic.field("code", dynamic.int)),
     dynamic.field("error", dynamic.field("message", dynamic.string)),
-    dynamic.field("error", dynamic.field("data", dynamic.dynamic)),
+    dynamic.field("error", dynamic.optional_field("data", dynamic.dynamic)),
   )
 }
 
