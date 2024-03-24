@@ -2,8 +2,8 @@ import gleam/io
 import gleam/option.{type Option}
 import gleam/result
 import gleam/json
-import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Queries, Raw, Url}
+import falcon
+import falcon/core.{Json}
 import gleam/dynamic
 import st_response
 import st_agent
@@ -435,7 +435,7 @@ pub fn optional_field_with_default(field_name, decoder, def) {
   fn(value) {
     value
     |> dynamic.optional_field(field_name, of: decoder)
-    |> result.try(fn(errs) { Ok(def) })
+    |> result.try(fn(_errs) { Ok(def) })
   }
 }
 
@@ -666,7 +666,7 @@ pub fn refuel_ship(
         st_market.decode_market_transaction(),
       ),
     )
-  let failure_decoder =
+  let _failure_decoder =
     dynamic.decode1(RefuelFailure, dynamic.field("message", dynamic.string))
   // let decoder = fn(val) {
   //   // io.debug(dict.keys(dynamic.unsafe_coerce(val)))
@@ -706,7 +706,7 @@ pub type ShipTransaction {
   ShipTransaction(
     waypoint_symbol: String,
     ship_symbol: String,
-    ship_type: String,
+    ship_type: ShipType,
     price: Int,
     agent_symbol: String,
     timestamp: String,
@@ -718,7 +718,7 @@ pub fn decode_ship_transaction() {
     ShipTransaction,
     dynamic.field("waypointSymbol", dynamic.string),
     dynamic.field("shipSymbol", dynamic.string),
-    dynamic.field("shipType", dynamic.string),
+    dynamic.field("shipType", decode_ship_type()),
     dynamic.field("price", dynamic.int),
     dynamic.field("agentSymbol", dynamic.string),
     dynamic.field("timestamp", dynamic.string),
@@ -769,17 +769,42 @@ pub fn decode_ship_type() {
   }
 }
 
+pub fn encode_ship_type(ship_type: ShipType) {
+  case ship_type {
+    ShipProbe -> "SHIP_PROBE"
+    ShipMiningDrone -> "SHIP_MINING_DRONE"
+    ShipSiphonDrone -> "SHIP_SIPHON_DRONE"
+    ShipInterceptor -> "SHIP_INTERCEPTOR"
+    ShipLightHauler -> "SHIP_LIGHT_HAULER"
+    ShipCommandFrigate -> "SHIP_COMMAND_FRIGATE"
+    ShipExplorer -> "SHIP_EXPLORER"
+    ShipHeavyFreighter -> "SHIP_HEAVY_FREIGHTER"
+    ShipLightShuttle -> "SHIP_LIGHT_SHUTTLE"
+    ShipOreHound -> "SHIP_ORE_HOUND"
+    ShipRefiningFreighter -> "SHIP_REFINING_FREIGHTER"
+    ShipSurveyor -> "SHIP_SURVEYOR"
+  }
+  |> json.string
+}
+
+pub const all_raw_ship_types = [
+  "SHIP_PROBE", "SHIP_MINING_DRONE", "SHIP_SIPHON_DRONE", "SHIP_INTERCEPTOR",
+  "SHIP_LIGHT_HAULER", "SHIP_COMMAND_FRIGATE", "SHIP_EXPLORER",
+  "SHIP_HEAVY_FREIGHTER", "SHIP_LIGHT_SHUTTLE", "SHIP_ORE_HOUND",
+  "SHIP_REFINING_FREIGHTER", "SHIP_SURVEYOR",
+]
+
 // type PurchaseShipError
 
 pub fn purchase_ship(
   client: falcon.Client,
   waypoint_symbol: String,
-  ship_type: String,
+  ship_type: ShipType,
 ) -> st_response.FalconResult(#(st_agent.Agent, Ship, ShipTransaction)) {
   let body =
     json.object([
       #("waypointSymbol", json.string(waypoint_symbol)),
-      #("shipType", json.string(ship_type)),
+      #("shipType", encode_ship_type(ship_type)),
     ])
     |> json.to_string
 
@@ -790,10 +815,7 @@ pub fn purchase_ship(
         fn(agent, ship, transaction) { #(agent, ship, transaction) },
         dynamic.field("agent", st_agent.decode_agent()),
         dynamic.field("ship", decode_ship()),
-        dynamic.field(
-          "data",
-          dynamic.field("transation", decode_ship_transaction()),
-        ),
+        dynamic.field("transation", decode_ship_transaction()),
       ),
     )
   }

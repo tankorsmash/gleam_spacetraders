@@ -6,6 +6,7 @@ import gleam/string
 import gleam/list
 import gleam/int
 import gleam/json
+import gleam/dynamic
 import falcon.{type Client}
 import falcon/core.{Url}
 // spacetraders
@@ -19,6 +20,7 @@ import st_market
 import argv
 import glint
 import glint/flag
+import glint/flag/constraint
 import birl
 import birl/duration
 
@@ -60,6 +62,7 @@ fn ship_type_flag() -> flag.FlagBuilder(String) {
   flag.string()
   // |> flag.default("TANKOR_SMASH-1")
   |> flag.description("ship type, ie SHIP_MINING_DRONE")
+  |> flag.constraint(constraint.one_of(st_ship.all_raw_ship_types))
 }
 
 const waypoint_flag_name = "waypoint"
@@ -380,13 +383,16 @@ pub fn refuel_ship(input: glint.CommandInput) -> String {
 
 pub fn purchase_ship(input: glint.CommandInput) -> String {
   io.println("purchasingg...")
-  let assert Ok(ship_type) =
+  let assert Ok(raw_ship_type) =
     flag.get_string(from: input.flags, for: ship_type_name)
+
+  let assert Ok(ship_type) =
+    st_ship.decode_ship_type()(dynamic.from(raw_ship_type))
 
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
 
-  io.println("purchasing ship type: " <> ship_type)
+  io.println("purchasing ship type: " <> string.inspect(ship_type))
 
   let resp =
     create_client()
