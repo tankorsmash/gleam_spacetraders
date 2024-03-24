@@ -262,6 +262,185 @@ pub fn decode_faction() {
   dynamic.field("symbol", dynamic.string)
 }
 
+pub const all_raw_waypoint_traits: List(String) = [
+  "UNCHARTED", "UNDER_CONSTRUCTION", "MARKETPLACE", "SHIPYARD", "OUTPOST",
+  "SCATTERED_SETTLEMENTS", "SPRAWLING_CITIES", "MEGA_STRUCTURES", "PIRATE_BASE",
+  "OVERCROWDED", "HIGH_TECH", "CORRUPT", "BUREAUCRATIC", "TRADING_HUB",
+  "INDUSTRIAL", "BLACK_MARKET", "RESEARCH_FACILITY", "MILITARY_BASE",
+  "SURVEILLANCE_OUTPOST", "EXPLORATION_OUTPOST", "MINERAL_DEPOSITS",
+  "COMMON_METAL_DEPOSITS", "PRECIOUS_METAL_DEPOSITS", "RARE_METAL_DEPOSITS",
+  "METHANE_POOLS", "ICE_CRYSTALS", "EXPLOSIVE_GASES", "STRONG_MAGNETOSPHERE",
+  "VIBRANT_AURORAS", "SALT_FLATS", "CANYONS", "PERPETUAL_DAYLIGHT",
+  "PERPETUAL_OVERCAST", "DRY_SEABEDS", "MAGMA_SEAS", "SUPERVOLCANOES",
+  "ASH_CLOUDS", "VAST_RUINS", "MUTATED_FLORA", "TERRAFORMED",
+  "EXTREME_TEMPERATURES", "EXTREME_PRESSURE", "DIVERSE_LIFE", "SCARCE_LIFE",
+  "FOSSILS", "WEAK_GRAVITY", "STRONG_GRAVITY", "CRUSHING_GRAVITY",
+  "TOXIC_ATMOSPHERE", "CORROSIVE_ATMOSPHERE", "BREATHABLE_ATMOSPHERE",
+  "THIN_ATMOSPHERE", "JOVIAN", "ROCKY", "VOLCANIC", "FROZEN", "SWAMP", "BARREN",
+  "TEMPERATE", "JUNGLE", "OCEAN", "RADIOACTIVE", "MICRO_GRAVITY_ANOMALIES",
+  "DEBRIS_CLUSTER", "DEEP_CRATERS", "SHALLOW_CRATERS", "UNSTABLE_COMPOSITION",
+  "HOLLOWED_INTERIOR", "STRIPPED",
+]
+
+pub type WaypointTrait {
+  Uncharted
+  UnderConstruction
+  Marketplace
+  Shipyard
+  Outpost
+  ScatteredSettlements
+  SprawlingCities
+  MegaStructures
+  PirateBase
+  Overcrowded
+  HighTech
+  Corrupt
+  Bureaucratic
+  TradingHub
+  Industrial
+  BlackMarket
+  ResearchFacility
+  MilitaryBase
+  SurveillanceOutpost
+  ExplorationOutpost
+  MineralDeposits
+  CommonMetalDeposits
+  PreciousMetalDeposits
+  RareMetalDeposits
+  MethanePools
+  IceCrystals
+  ExplosiveGases
+  StrongMagnetosphere
+  VibrantAuroras
+  SaltFlats
+  Canyons
+  PerpetualDaylight
+  PerpetualOvercast
+  DrySeabeds
+  MagmaSeas
+  Supervolcanoes
+  AshClouds
+  VastRuins
+  MutatedFlora
+  Terraformed
+  ExtremeTemperatures
+  ExtremePressure
+  DiverseLife
+  ScarceLife
+  Fossils
+  WeakGravity
+  StrongGravity
+  CrushingGravity
+  ToxicAtmosphere
+  CorrosiveAtmosphere
+  BreathableAtmosphere
+  ThinAtmosphere
+  Jovian
+  Rocky
+  Volcanic
+  Frozen
+  Swamp
+  Barren
+  Temperate
+  Jungle
+  Ocean
+  Radioactive
+  MicroGravityAnomalies
+  DebrisCluster
+  DeepCraters
+  ShallowCraters
+  UnstableComposition
+  HollowedInterior
+  Stripped
+}
+
+pub fn decode_waypoint_trait() {
+  fn(val) {
+    use raw_waypoint_trait <- result.try(dynamic.string(val))
+
+    // takes the raw string and returns the WaypointTrait that it is. it includes every single trait
+    case raw_waypoint_trait {
+      "UNCHARTED" -> Ok(Uncharted)
+      "UNDER_CONSTRUCTION" -> Ok(UnderConstruction)
+      "MARKETPLACE" -> Ok(Marketplace)
+      "SHIPYARD" -> Ok(Shipyard)
+      "OUTPOST" -> Ok(Outpost)
+      "SCATTERED_SETTLEMENTS" -> Ok(ScatteredSettlements)
+      "SPRAWLING_CITIES" -> Ok(SprawlingCities)
+      "MEGA_STRUCTURES" -> Ok(MegaStructures)
+      "PIRATE_BASE" -> Ok(PirateBase)
+      "OVERCROWDED" -> Ok(Overcrowded)
+      "HIGH_TECH" -> Ok(HighTech)
+      "CORRUPT" -> Ok(Corrupt)
+      "BUREAUCRATIC" -> Ok(Bureaucratic)
+      "TRADING_HUB" -> Ok(TradingHub)
+      "INDUSTRIAL" -> Ok(Industrial)
+      "BLACK_MARKET" -> Ok(BlackMarket)
+      "RESEARCH_FACILITY" -> Ok(ResearchFacility)
+      "MILITARY_BASE" -> Ok(MilitaryBase)
+      "SURVEILLANCE_OUTPOST" -> Ok(SurveillanceOutpost)
+      "EXPLORATION_OUTPOST" -> Ok(ExplorationOutpost)
+      "MINERAL_DEPOSITS" -> Ok(MineralDeposits)
+      "COMMON_METAL_DEPOSITS" -> Ok(CommonMetalDeposits)
+      "PRECIOUS_METAL_DEPOSITS" -> Ok(PreciousMetalDeposits)
+      "RARE_METAL_DEPOSITS" -> Ok(RareMetalDeposits)
+      "METHANE_POOLS" -> Ok(MethanePools)
+      "ICE_CRYSTALS" -> Ok(IceCrystals)
+      "EXPLOSIVE_GASES" -> Ok(ExplosiveGases)
+      "STRONG_MAGNETOSPHERE" -> Ok(StrongMagnetosphere)
+      "VIBRANT_AURORAS" -> Ok(VibrantAuroras)
+      "SALT_FLATS" -> Ok(SaltFlats)
+      "CANYONS" -> Ok(Canyons)
+      "PERPETUAL_DAYLIGHT" -> Ok(PerpetualDaylight)
+      "PERPETUAL_OVERCAST" -> Ok(PerpetualOvercast)
+      "DRY_SEABEDS" -> Ok(DrySeabeds)
+      "MAGMA_SEAS" -> Ok(MagmaSeas)
+      "SUPERVOLCANOES" -> Ok(Supervolcanoes)
+      "ASH_CLOUDS" -> Ok(AshClouds)
+      "VAST_RUINS" -> Ok(VastRuins)
+      "MUTATED_FLORA" -> Ok(MutatedFlora)
+      "TERRAFORMED" -> Ok(Terraformed)
+      "EXTREME_TEMPERATURES" -> Ok(ExtremeTemperatures)
+      "EXTREME_PRESSURE" -> Ok(ExtremePressure)
+      "DIVERSE_LIFE" -> Ok(DiverseLife)
+      "SCARCE_LIFE" -> Ok(ScarceLife)
+      "FOSSILS" -> Ok(Fossils)
+      "WEAK_GRAVITY" -> Ok(WeakGravity)
+      "STRONG_GRAVITY" -> Ok(StrongGravity)
+      "CRUSHING_GRAVITY" -> Ok(CrushingGravity)
+      "TOXIC_ATMOSPHERE" -> Ok(ToxicAtmosphere)
+      "CORROSIVE_ATMOSPHERE" -> Ok(CorrosiveAtmosphere)
+      "BREATHABLE_ATMOSPHERE" -> Ok(BreathableAtmosphere)
+      "THIN_ATMOSPHERE" -> Ok(ThinAtmosphere)
+      "JOVIAN" -> Ok(Jovian)
+      "ROCKY" -> Ok(Rocky)
+      "VOLCANIC" -> Ok(Volcanic)
+      "FROZEN" -> Ok(Frozen)
+      "SWAMP" -> Ok(Swamp)
+      "BARREN" -> Ok(Barren)
+      "TEMPERATE" -> Ok(Temperate)
+      "JUNGLE" -> Ok(Jungle)
+      "OCEAN" -> Ok(Ocean)
+      "RADIOACTIVE" -> Ok(Radioactive)
+      "MICRO_GRAVITY_ANOMALIES" -> Ok(MicroGravityAnomalies)
+      "DEBRIS_CLUSTER" -> Ok(DebrisCluster)
+      "DEEP_CRATERS" -> Ok(DeepCraters)
+      "SHALLOW_CRATERS" -> Ok(ShallowCraters)
+      "UNSTABLE_COMPOSITION" -> Ok(UnstableComposition)
+      "HOLLOWED_INTERIOR" -> Ok(HollowedInterior)
+      "STRIPPED" -> Ok(Stripped)
+      _ ->
+        Error([
+          dynamic.DecodeError(
+            expected: "UNCHARTED, UNDER_CONSTRUCTION etc",
+            found: raw_waypoint_trait,
+            path: ["idk"],
+          ),
+        ])
+    }
+  }
+}
+
 pub fn decode_trade() {
   dynamic.decode3(
     Trait,

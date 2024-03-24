@@ -46,7 +46,7 @@ const system_flag_name = "system"
 
 fn system_flag() -> flag.FlagBuilder(String) {
   flag.string()
-  |> flag.default("X1-KS19")
+  // |> flag.default("X1-KS19")
   |> flag.description("system symbol")
 }
 
@@ -89,6 +89,9 @@ fn traits_flag() -> flag.FlagBuilder(List(String)) {
   flag.string_list()
   |> flag.default([])
   |> flag.description("trait symbols")
+  |> flag.constraint(
+    constraint.each(constraint.one_of(st_waypoint.all_raw_waypoint_traits)),
+  )
 }
 
 fn view_agent(_input: glint.CommandInput) -> String {
