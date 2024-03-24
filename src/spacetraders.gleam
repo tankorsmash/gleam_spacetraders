@@ -5,15 +5,11 @@ import gleam/erlang/os
 import gleam/string
 import gleam/list
 import gleam/int
-import gleam/bool
 import gleam/json
-import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Raw, Url}
-import gleam/dynamic
-import gleeunit/should
+import falcon.{type Client}
+import falcon/core.{Url}
 // spacetraders
-import st_response.{type PagedResponse, extract_data}
-import contract.{type Contract, decode_contract_response}
+import st_response
 import st_waypoint
 import st_agent
 import st_ship
@@ -40,7 +36,7 @@ pub fn create_client() -> Client {
   client
 }
 
-const contract_id: String = "clthywl03m46cs60cl8ezck89f"
+// const contract_id: String = "clthywl03m46cs60cl8ezck89f"
 
 const system_flag_name = "system"
 
@@ -131,8 +127,10 @@ fn view_shipyard(input: glint.CommandInput) -> String {
       st_response.string_format_decode_errors(errors)
       |> io.println
     }
-    Error(_) -> {
-      todo
+    Error(unknown_error) -> {
+      io.debug(unknown_error)
+
+      Nil
     }
   }
 
@@ -191,8 +189,10 @@ fn view_market(input: glint.CommandInput) -> String {
       st_response.string_format_decode_errors(errors)
       |> io.println
     }
-    Error(_) -> {
-      todo
+    Error(unknown_error) -> {
+      io.debug(unknown_error)
+
+      Nil
     }
   }
 
@@ -364,7 +364,7 @@ pub fn refuel_ship(input: glint.CommandInput) -> String {
     Ok(refuel_response) -> {
       case refuel_response.body {
         // |> st_response.expect_200_body_result,
-        st_ship.RefuelSuccess(agent, fuel, transaction) ->
+        st_ship.RefuelSuccess(_agent, _fuel, _transaction) ->
           "Refuelled, probably. Agent and fuel and transcation TODO"
         st_ship.RefuelFailure(message) -> {
           "Failure: " <> message
@@ -396,7 +396,7 @@ pub fn purchase_ship(input: glint.CommandInput) -> String {
 
   case resp {
     Ok(purchase_response) -> {
-      let response = io.debug(purchase_response)
+      let _response = io.debug(purchase_response)
       ""
     }
     Error(error) -> {

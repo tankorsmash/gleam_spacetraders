@@ -18,6 +18,7 @@ glint = "~> 0.18"
 argv = "~> 1.0"
 halo = { path = "../halo_fork_gleam_34" }
 birl = "~> 1.6"
+gleam_json = "~> 1.0"
 
 [dev-dependencies]
 gleeunit = "~> 1.0"

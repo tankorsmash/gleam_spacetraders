@@ -1,17 +1,10 @@
 import gleam/io
-import dotenv
-import gleam/erlang/os
-import gleam/string
 import gleam/option.{type Option}
-import gleam/list
 import gleam/result
-import gleam/function
 import gleam/json
-import gleam/dict
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Queries, Raw, Url}
 import gleam/dynamic
-import gleeunit/should
 import st_response
 import st_agent
 import st_market
@@ -804,6 +797,7 @@ pub fn purchase_ship(
       ),
     )
   }
+
   // let invalid_ship_type_decoder = fn() {
   //   dynamic.field("error", dynamic.string)
   // }
