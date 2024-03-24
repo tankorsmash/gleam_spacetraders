@@ -120,21 +120,18 @@ fn view_waypoints(input: glint.CommandInput) -> String {
       dynamic.from(raw_waypoint_type)
       |> st_response.debug_decoder(st_waypoint.decode_waypoint_type()(_))
       |> option.from_result()
-      // |> result.replace_error(option.None)
     }
     Error(_) -> option.None
   }
 
   let resp =
     create_client()
-    // |> st_waypoint.get_waypoints_for_system("X1-KS19", [
     |> st_waypoint.get_waypoints_for_system(
       system_symbol,
       waypoint_type: waypoint_type,
       traits: traits,
     )
     |> st_response.expect_body_result
-  // st_waypoint.Trait("SHIPYARD", "", ""),
   case resp {
     Ok(waypoints) -> {
       st_waypoint.show_traits_for_waypoints(waypoints)
