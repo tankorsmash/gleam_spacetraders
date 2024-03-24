@@ -142,6 +142,34 @@ fn view_waypoints(input: glint.CommandInput) -> String {
   }
 }
 
+fn view_waypoint(input: glint.CommandInput) -> String {
+  io.println("viewing single waypoint")
+  let assert Ok(system_symbol) =
+    flag.get_string(from: input.flags, for: system_flag_name)
+  let assert Ok(waypoint_symbol) =
+    flag.get_string(from: input.flags, for: waypoint_flag_name)
+  io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
+
+  let assert resp =
+    create_client()
+    |> st_waypoint.get_waypoint(
+      system_symbol: system_symbol,
+      waypoint_symbol: waypoint_symbol,
+    )
+    |> st_response.expect_body_result
+
+  let qwe = 123
+
+  case resp {
+    Ok(waypoint) -> {
+      string.inspect(waypoint)
+    }
+    Error(api_error) -> {
+      api_error.message <> "\n" <> string.inspect(api_error.data)
+    }
+  }
+}
+
 fn view_shipyard(input: glint.CommandInput) -> String {
   io.println("viewing shipyard")
   let assert Ok(system_symbol) =
@@ -553,6 +581,13 @@ pub fn main() {
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(traits_flag_name, traits_flag())
         |> glint.flag(waypoint_type_flag_name, waypoint_type_flag())
+        |> glint.description("view waypoints for a given system"),
+    )
+    |> glint.add(
+      at: ["waypoint_info"],
+      do: glint.command(view_waypoint)
+        |> glint.flag(system_flag_name, system_flag())
+        |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view waypoints for a given system"),
     )
     |> glint.add(

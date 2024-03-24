@@ -302,9 +302,7 @@ pub fn get_waypoints_for_system(
   client
   |> falcon.get(
     url,
-    expecting: Json(
-      st_response.decode_api_response(decoder),
-    ),
+    expecting: Json(st_response.decode_api_response(decoder)),
     options: [
       Queries([
         #(
@@ -318,6 +316,23 @@ pub fn get_waypoints_for_system(
         #("limit", "20"),
       ]),
     ],
+  )
+}
+
+pub fn get_waypoint(
+  client: falcon.Client,
+  system_symbol system_symbol: String,
+  waypoint_symbol waypoint_symbol: String,
+) -> st_response.ApiResult(Waypoint) {
+  let decoder = st_response.decode_data(decode_waypoint())
+
+  let url = "systems/" <> system_symbol <> "/waypoints/" <> waypoint_symbol
+
+  client
+  |> falcon.get(
+    url,
+    expecting: Json(st_response.decode_api_response(decoder)),
+    options: [Queries([])],
   )
 }
 
