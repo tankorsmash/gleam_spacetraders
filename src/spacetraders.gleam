@@ -445,22 +445,29 @@ pub fn set_ship_to_navigate(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.navigate_ship_to_waypoint(ship_symbol, waypoint_symbol)
 
-  let #(nav, fuel, events) =
-    io.debug(resp)
+  // let #(nav, fuel, events) =
+  case
+    resp
     |> st_response.expect_200_body_result
+  {
+    st_ship.NavigateSuccess(nav, fuel, events) -> {
+      let nav_string = pretty_nav(nav)
+      let fuel_string =
+        "Fuel: "
+        <> int.to_string(fuel.current)
+        <> "/"
+        <> int.to_string(fuel.capacity)
 
-  let nav_string = pretty_nav(nav)
-  let fuel_string =
-    "Fuel: "
-    <> int.to_string(fuel.current)
-    <> "/"
-    <> int.to_string(fuel.capacity)
-
-  let event_string =
-    events
-    |> list.map(fn(event) { event.name <> " " <> event.description })
-    |> string.join(", ")
-  nav_string <> " " <> fuel_string <> " Events: " <> event_string
+      let event_string =
+        events
+        |> list.map(fn(event) { event.name <> " " <> event.description })
+        |> string.join(", ")
+      nav_string <> " " <> fuel_string <> " Events: " <> event_string
+    }
+    st_ship.NavigateFailure(message) -> {
+      "Navigation failed: " <> message
+    }
+  }
 }
 
 pub fn set_ship_to_dock(input: glint.CommandInput) -> String {

@@ -1,4 +1,3 @@
-import gleam/io
 import gleam/result
 import falcon
 import falcon/core.{Json}

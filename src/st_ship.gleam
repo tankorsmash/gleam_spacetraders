@@ -613,25 +613,38 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
   )
 }
 
+pub type NavigateResponse {
+  NavigateSuccess(nav: Nav, fuel: Fuel, events: List(ShipConditionEvent))
+  NavigateFailure(message: String)
+}
+
 pub fn navigate_ship_to_waypoint(
   client: falcon.Client,
   ship_symbol: String,
   waypoint_symbol: String,
-) -> st_response.FalconResult(#(Nav, Fuel, List(ShipConditionEvent))) {
+) -> st_response.FalconResult(NavigateResponse) {
   let body =
     json.object([#("waypointSymbol", json.string(waypoint_symbol))])
     |> json.to_string
-  let decoder = fn(val) {
+  let success_decoder = fn(val) {
     dynamic.field(
       "data",
       dynamic.decode3(
-        fn(nav, fuel, events) { #(nav, fuel, events) },
+        NavigateSuccess,
         dynamic.field("nav", decode_nav()),
         dynamic.field("fuel", decode_fuel()),
         dynamic.field("events", dynamic.list(decode_ship_condition_event())),
       ),
     )(io.debug(val))
   }
+
+  let failure_decoder = fn(val) {
+    dynamic.decode1(NavigateFailure, dynamic.field("message", dynamic.string))(
+      val,
+    )
+  }
+
+  let decoder = dynamic.any([success_decoder, failure_decoder])
 
   client
   |> falcon.post(
