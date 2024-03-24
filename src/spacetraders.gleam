@@ -348,7 +348,7 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
   case status {
     "IN_ORBIT" | "DOCKED" -> "Status: " <> status <> " - " <> flight_mode
     _ -> {
-      let qwe =
+      let duration_string =
         birl.difference(arrival, now)
         |> duration.decompose
         |> string.inspect
@@ -360,10 +360,10 @@ fn pretty_nav(nav: st_ship.Nav) -> String {
       <> destination.symbol
       <> " O:"
       <> origin.symbol
-      <> "\nETA: "
+      <> "\n\tETA: "
       <> route.arrival
-      <> "in "
-      <> qwe
+      <> " in\n\t\t"
+      <> duration_string
     }
   }
 }
