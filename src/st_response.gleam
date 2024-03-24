@@ -111,3 +111,10 @@ pub fn string_format_decode_errors(errors: List(dynamic.DecodeError)) -> String 
   })
   |> string.join("\n")
 }
+
+pub fn debug_decoder(decoder) {
+  fn(val) {
+    io.debug(val)
+    decoder(val)
+  }
+}

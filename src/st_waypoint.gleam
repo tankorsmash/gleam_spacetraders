@@ -1,15 +1,104 @@
-import gleam/io
-import dotenv
-import gleam/erlang/os
 import gleam/string
 import gleam/option.{type Option}
 import gleam/result
 import gleam/list
-import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Queries, Raw, Url}
+import gleam/json
+import falcon
+import falcon/core.{Json, Queries}
 import gleam/dynamic
-import gleeunit/should
 import st_response
+
+pub type WaypointType {
+  Planet
+  GasGiant
+  Moon
+  OrbitalStation
+  JumpGate
+  AsteroidField
+  Asteroid
+  EngineeredAsteroid
+  AsteroidBase
+  Nebula
+  DebrisField
+  GravityWell
+  ArtificialGravityWell
+  FuelStation
+}
+
+pub fn decode_waypoint_type() {
+  fn(val) {
+    use raw_waypoint_type <- result.try(dynamic.string(val))
+    // use raw_ship_type <- result.try(dynamic.string(val))
+
+    case raw_waypoint_type {
+      "PLANET" -> Ok(Planet)
+      "GAS_GIANT" -> Ok(GasGiant)
+      "MOON" -> Ok(Moon)
+      "ORBITAL_STATION" -> Ok(OrbitalStation)
+      "JUMP_GATE" -> Ok(JumpGate)
+      "ASTEROID_FIELD" -> Ok(AsteroidField)
+      "ASTEROID" -> Ok(Asteroid)
+      "ENGINEERED_ASTEROID" -> Ok(EngineeredAsteroid)
+      "ASTEROID_BASE" -> Ok(AsteroidBase)
+      "NEBULA" -> Ok(Nebula)
+      "DEBRIS_FIELD" -> Ok(DebrisField)
+      "GRAVITY_WELL" -> Ok(GravityWell)
+      "ARTIFICIAL_GRAVITY_WELL" -> Ok(ArtificialGravityWell)
+      "FUEL_STATION" -> Ok(FuelStation)
+      _ ->
+        Error([
+          dynamic.DecodeError(
+            expected: "PLANET, GAS_GIANT etc",
+            found: raw_waypoint_type,
+            path: ["idk"],
+          ),
+        ])
+    }
+  }
+}
+
+pub fn encode_waypoint_type(waypoint_type: WaypointType) -> json.Json {
+  case waypoint_type {
+    Planet -> "PLANET"
+    GasGiant -> "GAS_GIANT"
+    Moon -> "MOON"
+    OrbitalStation -> "ORBITAL_STATION"
+    JumpGate -> "JUMP_GATE"
+    AsteroidField -> "ASTEROID_FIELD"
+    Asteroid -> "ASTEROID"
+    EngineeredAsteroid -> "ENGINEERED_ASTEROID"
+    AsteroidBase -> "ASTEROID_BASE"
+    Nebula -> "NEBULA"
+    DebrisField -> "DEBRIS_FIELD"
+    GravityWell -> "GRAVITY_WELL"
+    ArtificialGravityWell -> "ARTIFICIAL_GRAVITY_WELL"
+    FuelStation -> "FUEL_STATION"
+  }
+  |> json.string
+}
+
+pub const all_waypoint_types = [
+  Planet,
+  GasGiant,
+  Moon,
+  OrbitalStation,
+  JumpGate,
+  AsteroidField,
+  Asteroid,
+  EngineeredAsteroid,
+  AsteroidBase,
+  Nebula,
+  DebrisField,
+  GravityWell,
+  ArtificialGravityWell,
+  FuelStation,
+]
+
+pub const all_raw_waypoint_types = [
+  "PLANET", "GAS_GIANT", "MOON", "ORBITAL_STATION", "JUMP_GATE",
+  "ASTEROID_FIELD", "ASTEROID", "ENGINEERED_ASTEROID", "ASTEROID_BASE", "NEBULA",
+  "DEBRIS_FIELD", "GRAVITY_WELL", "ARTIFICIAL_GRAVITY_WELL", "FUEL_STATION",
+]
 
 // {
 // 	"symbol": "string",
@@ -203,12 +292,19 @@ pub fn get_waypoints_for_system(
   let decoder = st_response.decode_data(dynamic.list(decode_waypoint()))
   let url = "systems/" <> system_symbol <> "/waypoints"
   client
-  |> falcon.get(url, expecting: Json(decoder), options: [
-    Queries([
-      #("traits", string.join(list.map(traits, fn(t) { t.symbol }), with: ",")),
-      #("limit", "20"),
-    ]),
-  ])
+  |> falcon.get(
+    url,
+    expecting: Json(st_response.debug_decoder(decoder)),
+    options: [
+      Queries([
+        #(
+          "traits",
+          string.join(list.map(traits, fn(t) { t.symbol }), with: ","),
+        ),
+        #("limit", "20"),
+      ]),
+    ],
+  )
 }
 
 pub fn show_traits_for_waypoints(waypoints: List(Waypoint)) -> String {

@@ -1,5 +1,4 @@
 import gleam/io
-
 import gleam/result
 import falcon
 import falcon/core.{Json}
@@ -252,11 +251,4 @@ pub fn view_available_ships(
     // Raw(dynamic.dynamic),
     [],
   )
-}
-
-pub fn debug_decoder(decoder) {
-  fn(val) {
-    io.debug(val)
-    decoder(val)
-  }
 }
