@@ -29,6 +29,10 @@ pub type ApiError(data) {
   ApiError(status: Int, message: String, data: data)
 }
 
+/// the Ok result will be either the decoder we want, or the generic ApiError type
+pub type ApiResult(data) =
+  FalconResult(Result(data, ApiError(dynamic.Dynamic)))
+
 pub fn decode_api_error() {
   dynamic.decode3(
     ApiError,
@@ -36,6 +40,13 @@ pub fn decode_api_error() {
     dynamic.field("error", dynamic.field("message", dynamic.string)),
     dynamic.field("error", dynamic.field("data", dynamic.dynamic)),
   )
+}
+
+pub fn decode_api_response(success_decoder) {
+  dynamic.any([
+    dynamic.decode1(Ok, success_decoder),
+    dynamic.decode1(Error, decode_api_error()),
+  ])
 }
 
 pub fn decode_meta() {

@@ -294,7 +294,7 @@ pub fn get_waypoints_for_system(
   system_symbol system_symbol: String,
   waypoint_type waypoint_type: Option(WaypointType),
   traits traits: List(Trait),
-) -> st_response.FalconResult(List(Waypoint)) {
+) -> st_response.ApiResult(List(Waypoint)) {
   let decoder = st_response.decode_data(dynamic.list(decode_waypoint()))
 
   let url = "systems/" <> system_symbol <> "/waypoints"
@@ -302,7 +302,9 @@ pub fn get_waypoints_for_system(
   client
   |> falcon.get(
     url,
-    expecting: Json(st_response.debug_decoder(decoder)),
+    expecting: Json(
+      st_response.debug_decoder(st_response.decode_api_response(decoder)),
+    ),
     options: [
       Queries([
         #(

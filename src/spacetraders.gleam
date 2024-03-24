@@ -136,8 +136,11 @@ fn view_waypoints(input: glint.CommandInput) -> String {
     |> st_response.expect_body_result
   // st_waypoint.Trait("SHIPYARD", "", ""),
   case resp {
-    waypoints -> {
+    Ok(waypoints) -> {
       st_waypoint.show_traits_for_waypoints(waypoints)
+    }
+    Error(api_error) -> {
+      api_error.message
     }
   }
 }
