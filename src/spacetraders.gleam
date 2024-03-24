@@ -140,7 +140,7 @@ fn view_waypoints(input: glint.CommandInput) -> String {
       st_waypoint.show_traits_for_waypoints(waypoints)
     }
     Error(api_error) -> {
-      api_error.message
+      api_error.message <> "\n" <> string.inspect(api_error.data)
     }
   }
 }

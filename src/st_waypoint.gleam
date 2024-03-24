@@ -303,7 +303,7 @@ pub fn get_waypoints_for_system(
   |> falcon.get(
     url,
     expecting: Json(
-      st_response.debug_decoder(st_response.decode_api_response(decoder)),
+      st_response.decode_api_response(decoder),
     ),
     options: [
       Queries([
