@@ -1,6 +1,7 @@
 import dotenv
 import gleam/io
 
+import pprint
 // import gleam_stdlib
 import falcon.{type Client}
 import falcon/core.{Url}
@@ -29,6 +30,7 @@ import glint
 import glint/flag
 import glint/flag/constraint
 
+/// Creates a spacetraders-authorized client with the token from the environment
 pub fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
   let client =
@@ -41,6 +43,14 @@ pub fn create_client() -> Client {
       timeout: falcon.default_timeout,
     )
   client
+}
+
+pub fn create_anon_client() -> Client {
+  falcon.new(
+    base_url: Url("https://api.spacetraders.io/v2/"),
+    headers: [#("Content-Type", "application/json")],
+    timeout: falcon.default_timeout,
+  )
 }
 
 // const contract_id: String = "clthywl03m46cs60cl8ezck89f"
@@ -59,6 +69,21 @@ fn ship_symbol_flag() -> flag.FlagBuilder(String) {
   flag.string()
   |> flag.default("TANKOR_SMASH-1")
   |> flag.description("ship symbol")
+}
+
+const agent_name_flag_name = "agent_name"
+
+fn agent_name_flag() -> flag.FlagBuilder(String) {
+  flag.string()
+  |> flag.default("TANKOR_SMASH")
+  |> flag.description("agent name")
+}
+
+const email_address_flag_name = "email"
+
+fn email_name_flag() -> flag.FlagBuilder(String) {
+  flag.string()
+  |> flag.description("an email address")
 }
 
 const ship_type_name = "ship_type"
@@ -102,6 +127,29 @@ fn view_agent(_input: glint.CommandInput) -> String {
   create_client()
   |> st_agent.get_my_agent
   |> st_response.expect_200_body_result
+  |> string.inspect
+}
+
+fn register_agent(input: glint.CommandInput) -> String {
+  io.println("registering agent")
+  let assert Ok(agent_name) =
+    flag.get_string(from: input.flags, for: agent_name_flag_name)
+  let email_address =
+    flag.get_string(from: input.flags, for: email_address_flag_name)
+    |> option.from_result()
+  create_anon_client()
+  |> fn(client) { st_agent.register_agent(client, agent_name, "COSMIC", email_address) }
+  |> fn(resp) {
+    case resp {
+      Ok(valid_resp) -> {
+        core.extract_body(valid_resp)
+        |> pprint.debug
+      }
+      Error(error) -> {
+        todo
+      }
+    }
+  }
   |> string.inspect
 }
 
@@ -156,15 +204,13 @@ fn view_waypoint(input: glint.CommandInput) -> String {
     flag.get_string(from: input.flags, for: waypoint_flag_name)
   io.println("system: " <> system_symbol <> " waypoint: " <> waypoint_symbol)
 
-  let assert resp =
+  let resp =
     create_client()
     |> st_waypoint.get_waypoint(
       system_symbol: system_symbol,
       waypoint_symbol: waypoint_symbol,
     )
     |> st_response.expect_body_result
-
-  let qwe = 123
 
   case resp {
     Ok(waypoint) -> {
@@ -543,6 +589,13 @@ pub fn main() {
       at: ["agent"],
       do: glint.command(view_agent)
         |> glint.description("view your agent"),
+    )
+    |> glint.add(
+      at: ["register_agent"],
+      do: glint.command(register_agent)
+        |> glint.flag(agent_name_flag_name, agent_name_flag())
+        |> glint.flag(email_address_flag_name, email_name_flag())
+        |> glint.description("register a new agent"),
     )
     |> glint.add(
       at: ["my_ships"],
