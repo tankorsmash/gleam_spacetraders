@@ -2,6 +2,7 @@ import dotenv
 import gleam/io
 
 import pprint
+
 // import gleam_stdlib
 import falcon.{type Client}
 import falcon/core.{Url}
@@ -11,7 +12,6 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option
-import gleam/result
 import gleam/string
 
 // spacetraders
@@ -138,14 +138,16 @@ fn register_agent(input: glint.CommandInput) -> String {
     flag.get_string(from: input.flags, for: email_address_flag_name)
     |> option.from_result()
   create_anon_client()
-  |> fn(client) { st_agent.register_agent(client, agent_name, "COSMIC", email_address) }
+  |> fn(client) {
+    st_agent.register_agent(client, agent_name, "COSMIC", email_address)
+  }
   |> fn(resp) {
     case resp {
       Ok(valid_resp) -> {
         core.extract_body(valid_resp)
         |> pprint.debug
       }
-      Error(error) -> {
+      Error(_error) -> {
         todo
       }
     }

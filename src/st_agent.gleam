@@ -1,12 +1,12 @@
 import dotenv
 import falcon.{type Client, type FalconError, type FalconResponse}
 import falcon/core.{Json, Raw, Url}
-import gleam/option
 import gleam/dynamic
 import gleam/erlang/os
 import gleam/io
 import gleam/json
 import gleam/list
+import gleam/option
 import gleam/string
 import gleeunit/should
 import st_response
