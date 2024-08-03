@@ -1,13 +1,13 @@
-import gleam/io
-import gleam/option.{type Option}
-import gleam/result
-import gleam/json
 import falcon
 import falcon/core.{Json}
 import gleam/dynamic
-import st_response
+import gleam/io
+import gleam/json
+import gleam/option.{type Option}
+import gleam/result
 import st_agent
 import st_market
+import st_response
 
 // import st_market
 

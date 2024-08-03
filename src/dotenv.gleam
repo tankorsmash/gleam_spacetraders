@@ -1,8 +1,8 @@
-import gleam/string
+import gleam/erlang/os
 import gleam/list
 import gleam/result
+import gleam/string
 import simplifile
-import gleam/erlang/os
 
 /// Tries to load environment variables from a `.env` file in the current
 /// working directory.

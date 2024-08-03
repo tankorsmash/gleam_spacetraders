@@ -1,8 +1,8 @@
 import falcon.{type Client}
 import falcon/core.{Json}
 import gleam/dynamic
-import st_response
 import st_agent
+import st_response
 
 pub type Deliver {
   Deliver(

@@ -1,12 +1,12 @@
-import gleam/string
-import gleam/option.{type Option}
-import gleam/result
-import gleam/list
-import gleam/io
-import gleam/json
 import falcon
 import falcon/core.{Json, Queries}
 import gleam/dynamic
+import gleam/io
+import gleam/json
+import gleam/list
+import gleam/option.{type Option}
+import gleam/result
+import gleam/string
 import st_response
 
 pub type WaypointType {
@@ -83,20 +83,9 @@ pub fn encode_waypoint_type(waypoint_type: WaypointType) -> json.Json {
 }
 
 pub const all_waypoint_types = [
-  Planet,
-  GasGiant,
-  Moon,
-  OrbitalStation,
-  JumpGate,
-  AsteroidField,
-  Asteroid,
-  EngineeredAsteroid,
-  AsteroidBase,
-  Nebula,
-  DebrisField,
-  GravityWell,
-  ArtificialGravityWell,
-  FuelStation,
+  Planet, GasGiant, Moon, OrbitalStation, JumpGate, AsteroidField, Asteroid,
+  EngineeredAsteroid, AsteroidBase, Nebula, DebrisField, GravityWell,
+  ArtificialGravityWell, FuelStation,
 ]
 
 pub const all_raw_waypoint_types = [

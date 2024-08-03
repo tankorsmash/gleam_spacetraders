@@ -1,30 +1,33 @@
-import gleam/io
 import dotenv
+import gleam/io
+
 // import gleam_stdlib
+import falcon.{type Client}
+import falcon/core.{Url}
+import gleam/dynamic
 import gleam/erlang/os
-import gleam/string
+import gleam/int
+import gleam/json
 import gleam/list
 import gleam/option
 import gleam/result
-import gleam/int
-import gleam/json
-import gleam/dynamic
-import falcon.{type Client}
-import falcon/core.{Url}
+import gleam/string
+
 // spacetraders
-import st_response
-import st_waypoint
 import st_agent
+import st_market
+import st_response
 import st_ship
 import st_shipyard
-import st_market
+import st_waypoint
+
 // glint arg parse
 import argv
+import birl
+import birl/duration
 import glint
 import glint/flag
 import glint/flag/constraint
-import birl
-import birl/duration
 
 pub fn create_client() -> Client {
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
