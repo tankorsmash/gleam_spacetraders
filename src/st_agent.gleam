@@ -1,14 +1,8 @@
-import dotenv
-import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Raw, Url}
+import falcon.{type Client}
+import falcon/core.{Json}
 import gleam/dynamic
-import gleam/erlang/os
-import gleam/io
 import gleam/json
-import gleam/list
 import gleam/option
-import gleam/string
-import gleeunit/should
 import st_response
 
 // {
@@ -62,6 +56,11 @@ pub fn register_agent(
     ])
 
   client
-  // |> falcon.post("register", json.to_string(body), Json(decode_agent()), [])
-  |> falcon.post("register", json.to_string(body), Json(dynamic.dynamic), [])
+  |> falcon.post(
+    "register",
+    json.to_string(body),
+    // Json(st_response.decode_api_response(decode_agent())), // can't use decode_agent because id lose the api token
+    Json(st_response.decode_api_response(dynamic.dynamic)),
+    [],
+  )
 }

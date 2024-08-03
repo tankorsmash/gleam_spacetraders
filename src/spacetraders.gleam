@@ -145,14 +145,31 @@ fn register_agent(input: glint.CommandInput) -> String {
     case resp {
       Ok(valid_resp) -> {
         core.extract_body(valid_resp)
-        |> pprint.debug
+        |> pprint.format
+        |> fn(body) { body <> "erer" }
       }
-      Error(_error) -> {
-        todo
+      Error(error) -> {
+        case error {
+          core.URLParseError -> {
+            "URLParseError"
+          }
+          core.InvalidUtf8Response -> {
+            "InvalidUtf8Response"
+          }
+          core.HackneyError(_) -> {
+            "HackneyError"
+          }
+          core.JsonDecodingError(_) -> {
+            "JsonDecodingError"
+          }
+          core.RawDecodingError(errors2) -> {
+            st_response.string_format_decode_errors(errors2)
+          }
+        }
+        <> pprint.format(error)
       }
     }
   }
-  |> string.inspect
 }
 
 fn view_waypoints(input: glint.CommandInput) -> String {
@@ -580,9 +597,7 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
   // |> string.inspect
 }
 
-pub fn main() {
-  dotenv.config()
-
+pub fn handle_cli() {
   let _ =
     glint.new()
     |> glint.with_name("spacetraders")
@@ -668,4 +683,10 @@ pub fn main() {
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
       io.println("the returned value is:\n" <> x)
     })
+}
+
+pub fn main() {
+  dotenv.config()
+
+  handle_cli()
 }

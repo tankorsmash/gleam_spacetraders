@@ -1,10 +1,7 @@
-import dotenv
-import falcon.{type Client, type FalconError, type FalconResponse}
-import falcon/core.{Json, Raw, Url}
+import falcon.{type FalconError, type FalconResponse}
+import falcon/core
 import gleam/dynamic
-import gleam/erlang/os
 import gleam/io
-import gleam/json
 import gleam/list
 import gleam/option
 import gleam/result
