@@ -1,18 +1,23 @@
 import dotenv
 import gleam/io
 
+
 import pprint
 
 // import gleam_stdlib
 import falcon.{type Client}
 import falcon/core.{Url}
+
 import gleam/dynamic
 import gleam/erlang/os
+import gleam/erlang/process
 import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option
 import gleam/string
+
+import radiate
 
 // spacetraders
 import st_agent
@@ -29,6 +34,10 @@ import birl/duration
 import glint
 import glint/flag
 import glint/flag/constraint
+
+//local
+import message
+import app/app
 
 /// Creates a spacetraders-authorized client with the token from the environment
 pub fn create_client() -> Client {
@@ -597,7 +606,9 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
   // |> string.inspect
 }
 
-pub fn handle_cli() {
+pub fn handle_cli() -> Nil {
+  let now = birl.now()
+  io.println("the time is: " <> birl.to_iso8601(now))
   let _ =
     glint.new()
     |> glint.with_name("spacetraders")
@@ -688,5 +699,26 @@ pub fn handle_cli() {
 pub fn main() {
   dotenv.config()
 
+  let _ =
+    radiate.new()
+    |> radiate.add_dir("src")
+    |> radiate.start()
+
+  let timer_subject = process.new_subject()
+
+  app.main()
+
+  // loop(timer_subject)
+}
+
+fn loop(subject: process.Subject(Nil)) {
+  process.send_after(subject, 2000, Nil)
+
+  let _ = process.receive(subject, 2500)
+
+  io.debug(message.get_message())
+
   handle_cli()
+
+  loop(subject)
 }
