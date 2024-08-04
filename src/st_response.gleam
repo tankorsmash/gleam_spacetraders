@@ -73,7 +73,7 @@ pub fn decode_paged_response(field_decoder) {
   )
 }
 
-pub fn decode_data(field_decoder) {
+pub fn decode_data(field_decoder: dynamic.Decoder(a)) {
   dynamic.field("data", field_decoder)
 }
 

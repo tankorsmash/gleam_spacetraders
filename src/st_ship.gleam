@@ -673,7 +673,7 @@ pub fn refuel_ship(
   let success_decoder =
     dynamic.decode3(
       RefuelSuccess,
-      dynamic.field("agent", st_agent.decode_agent()),
+      dynamic.field("agent", st_agent.decode_agent),
       dynamic.field("fuel", decode_fuel()),
       dynamic.optional_field(
         "transation",
@@ -827,7 +827,7 @@ pub fn purchase_ship(
       "data",
       dynamic.decode3(
         fn(agent, ship, transaction) { #(agent, ship, transaction) },
-        dynamic.field("agent", st_agent.decode_agent()),
+        dynamic.field("agent", st_agent.decode_agent),
         dynamic.field("ship", decode_ship()),
         dynamic.field("transation", decode_ship_transaction()),
       ),

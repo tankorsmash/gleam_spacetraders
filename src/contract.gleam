@@ -109,7 +109,7 @@ pub fn accept_contract(
   let decoder =
     st_response.decode_data(dynamic.decode2(
       AcceptContract,
-      st_agent.decode_agent(),
+      st_agent.decode_agent,
       decode_contract(),
     ))
 
