@@ -4,9 +4,14 @@ import gleam/dynamic
 import gleam/io
 import gleam/list
 import gleam/option
+import gleam/http
+import efetch
+import gleam/http/request
+import pprint
 import gleam/result
 import gleam/string
 import gleeunit/should
+import dot_env/env
 
 pub type FalconResult(data) =
   Result(FalconResponse(data), FalconError)
@@ -153,4 +158,41 @@ pub fn debug_decoder(decoder) {
     io.debug(val)
     decoder(val)
   }
+}
+
+pub type ClientEx
+
+pub fn create_request(path: String) -> request.Request(String) {
+  // let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
+  let assert Ok(token) = env.get("SPACETRADERS_TOKEN")
+
+  let body = ""
+
+  request.Request(
+    method: http.Get,
+    headers: [
+      #("Authorization", "Bearer " <> token),
+      #("Content-Type", "application/json"),
+    ],
+    body: body,
+    scheme: http.Https,
+    host: "api.spacetraders.io",
+    port: option.Some(80),
+    path: "/v2/" <> path,
+    query: option.None,
+  )
+}
+
+pub fn create_my_agent_request() -> request.Request(String) {
+  let path = "my/agent"
+  create_request(path)
+}
+
+pub fn test_efetch() {
+  let req = create_my_agent_request()
+  // use result_response <- efetch.send(req)
+  let result_response = efetch.send(req)
+
+  result_response
+  |> pprint.debug
 }

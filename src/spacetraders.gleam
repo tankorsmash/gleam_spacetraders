@@ -1,6 +1,5 @@
-import dotenv
-import gleam/io
-
+import dot_env
+// import dotenv/env
 
 import pprint
 
@@ -9,14 +8,17 @@ import falcon.{type Client}
 import falcon/core.{Url}
 
 import gleam/dynamic
-import gleam/erlang/os
 import gleam/erlang/process
+import gleam/erlang/os
+import gleam/http/request
+import gleam/io
 import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option
 import gleam/string
 
+import efetch
 import radiate
 
 // spacetraders
@@ -36,11 +38,14 @@ import glint/flag
 import glint/flag/constraint
 
 //local
-import message
 import app/app
+import message
+
+
 
 /// Creates a spacetraders-authorized client with the token from the environment
 pub fn create_client() -> Client {
+  // let assert Ok(token) = env.get("SPACETRADERS_TOKEN")
   let assert Ok(token) = os.get_env("SPACETRADERS_TOKEN")
   let client =
     falcon.new(
@@ -697,7 +702,9 @@ pub fn handle_cli() -> Nil {
 }
 
 pub fn main() {
-  dotenv.config()
+  dot_env.load()
+  // dotenv.config()
+
 
   let _ =
     radiate.new()
@@ -705,10 +712,9 @@ pub fn main() {
     |> radiate.start()
 
   let timer_subject = process.new_subject()
-
   // app.main()
 
-  // loop(timer_subject)
+  loop(timer_subject)
 }
 
 fn loop(subject: process.Subject(Nil)) {
