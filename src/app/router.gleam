@@ -1,6 +1,6 @@
-import wisp.{type Request, type Response}
-import gleam/string_builder
 import app/web
+import gleam/string_builder
+import wisp.{type Request, type Response}
 
 /// The HTTP request handler- your application!
 /// 

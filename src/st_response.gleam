@@ -3,9 +3,11 @@ import efetch
 import falcon.{type FalconError, type FalconResponse}
 import falcon/core
 import gleam/dynamic
+import gleam/float
 import gleam/http
 import gleam/http/request
 import gleam/http/response
+import gleam/int
 import gleam/io
 import gleam/json
 import gleam/list
@@ -198,6 +200,49 @@ pub fn create_my_ships_request() -> request.Request(String) {
   create_request(path)
 }
 
+pub type RateLimit {
+  RateLimit(
+    rate_limit_type: String,
+    limit_burst: Int,
+    limit_per_second: Int,
+    remaining: Int,
+    reset: String,
+  )
+}
+
+pub fn parse_headers_for_rate_limit(
+  headers: List(#(String, String)),
+) -> Result(RateLimit, json.DecodeError) {
+  headers
+  |> list.map(fn(header) {
+    let name = header.0
+    let raw_value = header.1
+    let is_float = float.parse(raw_value)
+    let is_int = int.parse(raw_value)
+
+    case is_float, is_int {
+      Ok(f), _ -> #(name, f |> json.float)
+      _, Ok(i) -> #(name, i |> json.int)
+      _, _ -> #(name, raw_value |> json.string)
+    }
+  })
+  |> json.object
+  |> json.to_string
+  |> fn(raw_json) {
+    json.decode(
+      from: raw_json,
+      using: dynamic.decode5(
+        RateLimit,
+        dynamic.field("x-ratelimit-type", dynamic.string),
+        dynamic.field("x-ratelimit-limit-burst", dynamic.int),
+        dynamic.field("x-ratelimit-limit-per-second", dynamic.int),
+        dynamic.field("x-ratelimit-remaining", dynamic.int),
+        dynamic.field("x-ratelimit-reset", dynamic.string),
+      ),
+    )
+  }
+}
+
 pub fn test_efetch(req: request.Request(String), decoder) {
   // let req = create_my_agent_request()
   // use result_response <- efetch.send(req)
@@ -207,6 +252,10 @@ pub fn test_efetch(req: request.Request(String), decoder) {
   |> fn(r: Result(response.Response(String), efetch.HttpError)) {
     case r {
       Ok(response) -> {
+        response.headers
+        |> parse_headers_for_rate_limit
+        |> pprint.debug
+
         response
         // |> pprint.debug
         |> fn(r: response.Response(String)) { r.body }
