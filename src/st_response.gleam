@@ -1,17 +1,22 @@
+import dot_env/env
+import efetch
 import falcon.{type FalconError, type FalconResponse}
 import falcon/core
 import gleam/dynamic
+import gleam/http
+import gleam/http/request
+import gleam/http/response
 import gleam/io
+import gleam/json
 import gleam/list
 import gleam/option
-import gleam/http
-import efetch
-import gleam/http/request
-import pprint
 import gleam/result
 import gleam/string
 import gleeunit/should
-import dot_env/env
+import pprint.{
+  type BitArrayMode, type Config, type LabelMode, type StyleMode,
+  BitArraysAsString, NoLabels, Styled, Unstyled,
+}
 
 pub type FalconResult(data) =
   Result(FalconResponse(data), FalconError)
@@ -168,19 +173,22 @@ pub fn create_request(path: String) -> request.Request(String) {
 
   let body = ""
 
-  request.Request(
-    method: http.Get,
-    headers: [
-      #("Authorization", "Bearer " <> token),
-      #("Content-Type", "application/json"),
-    ],
-    body: body,
-    scheme: http.Https,
-    host: "api.spacetraders.io",
-    port: option.Some(80),
-    path: "/v2/" <> path,
-    query: option.None,
-  )
+  let request =
+    request.Request(
+      method: http.Get,
+      headers: [
+        #("Authorization", "Bearer " <> token),
+        #("Content-Type", "application/json"),
+      ],
+      body: body,
+      scheme: http.Http,
+      host: "api.spacetraders.io",
+      port: option.Some(80),
+      path: "/v2/" <> path,
+      query: option.None,
+    )
+
+  request
 }
 
 pub fn create_my_agent_request() -> request.Request(String) {
@@ -188,11 +196,51 @@ pub fn create_my_agent_request() -> request.Request(String) {
   create_request(path)
 }
 
-pub fn test_efetch() {
-  let req = create_my_agent_request()
+pub fn create_my_ships_request() -> request.Request(String) {
+  let path = "my/ships"
+  create_request(path)
+}
+
+pub fn test_efetch(decoder) {
+  // let req = create_my_agent_request()
+  let req = create_my_ships_request()
   // use result_response <- efetch.send(req)
   let result_response = efetch.send(req)
 
   result_response
-  |> pprint.debug
+  |> fn(r: Result(response.Response(String), efetch.HttpError)) {
+    r
+    // case r {
+    //   Ok(response) -> {
+    //     response
+    //     // |> pprint.debug
+    //     |> fn(r: response.Response(String)) { r.body }
+    //     |> json.decode(decoder)
+    //     |> fn(decode_result) {
+    //       case decode_result {
+    //         Ok(Ok(data)) -> {
+    //           data
+    //           |> pprint.with_config(pprint.Config(
+    //             Styled,
+    //             BitArraysAsString,
+    //             pprint.Labels,
+    //           ))
+    //         }
+    //         Ok(Error(_)) -> {
+    //           "Error decoding"
+    //         }
+    //         Error(err) -> {
+    //           err
+    //           |> pprint.format
+    //         }
+    //       }
+    //     }
+    //     |> pprint.format
+    //   }
+    //   Error(err) -> {
+    //     err
+    //     |> pprint.format
+    //   }
+    // }
+  }
 }

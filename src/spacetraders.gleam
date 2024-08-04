@@ -1,4 +1,5 @@
 import dot_env
+
 // import dotenv/env
 
 import pprint
@@ -8,11 +9,11 @@ import falcon.{type Client}
 import falcon/core.{Url}
 
 import gleam/dynamic
-import gleam/erlang/process
 import gleam/erlang/os
+import gleam/erlang/process
 import gleam/http/request
-import gleam/io
 import gleam/int
+import gleam/io
 import gleam/json
 import gleam/list
 import gleam/option
@@ -40,8 +41,6 @@ import glint/flag/constraint
 //local
 import app/app
 import message
-
-
 
 /// Creates a spacetraders-authorized client with the token from the environment
 pub fn create_client() -> Client {
@@ -705,7 +704,6 @@ pub fn main() {
   dot_env.load()
   // dotenv.config()
 
-
   let _ =
     radiate.new()
     |> radiate.add_dir("src")
@@ -724,7 +722,16 @@ fn loop(subject: process.Subject(Nil)) {
 
   io.debug(message.get_message())
 
-  handle_cli()
+  // handle_cli()
+  // st_response.create_my_agent_request()
+  // let decoder = st_agent.decode_agent()
+  let decoder = st_ship.decode_ships()
+  let resp =
+    st_response.test_efetch(
+      // st_response.decode_data(st_response.decode_api_response(decoder)),
+      st_response.decode_data(decoder),
+    )
+  pprint.debug(resp)
 
   loop(subject)
 }
