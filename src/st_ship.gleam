@@ -297,34 +297,32 @@ pub type Consumed {
   Consumed(amount: Int, timestamp: String)
 }
 
-pub fn decode_ship() {
-  fn(value) {
-    use #(s, r, n, c) <- result.try(dynamic.decode4(
-      fn(s, r, n, c) { #(s, r, n, c) },
-      dynamic.field("symbol", dynamic.string),
-      dynamic.field("registration", decode_registration()),
-      dynamic.field("nav", decode_nav()),
-      dynamic.field("crew", decode_crew()),
-    )(value))
+pub fn decode_ship(value: dynamic.Dynamic) {
+  use #(s, r, n, c) <- result.try(dynamic.decode4(
+    fn(s, r, n, c) { #(s, r, n, c) },
+    dynamic.field("symbol", dynamic.string),
+    dynamic.field("registration", decode_registration()),
+    dynamic.field("nav", decode_nav()),
+    dynamic.field("crew", decode_crew()),
+  )(value))
 
-    dynamic.decode8(
-      fn(f, re, e, co, m, mo, ca, fu) {
-        Ship(s, r, n, c, f, re, e, co, m, mo, ca, fu)
-      },
-      //   dynamic.field("symbol", dynamic.string),
-      //   dynamic.field("registration", decode_registration),
-      //   dynamic.field("nav", decode_nav),
-      //   dynamic.field("crew", decode_crew),
-      dynamic.field("frame", decode_frame()),
-      dynamic.field("reactor", decode_reactor()),
-      dynamic.field("engine", decode_engine()),
-      dynamic.field("cooldown", decode_cooldown()),
-      dynamic.field("modules", dynamic.list(decode_module())),
-      dynamic.field("mounts", dynamic.list(decode_mount())),
-      dynamic.field("cargo", decode_cargo()),
-      dynamic.field("fuel", decode_fuel()),
-    )(value)
-  }
+  dynamic.decode8(
+    fn(f, re, e, co, m, mo, ca, fu) {
+      Ship(s, r, n, c, f, re, e, co, m, mo, ca, fu)
+    },
+    //   dynamic.field("symbol", dynamic.string),
+    //   dynamic.field("registration", decode_registration),
+    //   dynamic.field("nav", decode_nav),
+    //   dynamic.field("crew", decode_crew),
+    dynamic.field("frame", decode_frame()),
+    dynamic.field("reactor", decode_reactor()),
+    dynamic.field("engine", decode_engine()),
+    dynamic.field("cooldown", decode_cooldown()),
+    dynamic.field("modules", dynamic.list(decode_module())),
+    dynamic.field("mounts", dynamic.list(decode_mount())),
+    dynamic.field("cargo", decode_cargo()),
+    dynamic.field("fuel", decode_fuel()),
+  )(value)
 }
 
 pub fn decode_registration() {
@@ -573,15 +571,15 @@ pub fn decode_consumed() {
   )
 }
 
-pub fn decode_ships() {
-  dynamic.list(decode_ship())
+pub fn decode_ships(dynamic: dynamic.Dynamic) {
+  dynamic.list(decode_ship)(dynamic)
 }
 
 pub fn get_my_ships(client: falcon.Client) {
   client
   |> falcon.get(
     "/my/ships/",
-    Json(st_response.decode_paged_response(decode_ships())),
+    Json(st_response.decode_paged_response(decode_ships)),
     // Json(st_response.decode_response(dynamic.dynamic)),
     // Raw(dynamic.dynamic),
     [],
@@ -627,8 +625,9 @@ pub fn navigate_ship_to_waypoint(
     json.object([#("waypointSymbol", json.string(waypoint_symbol))])
     |> json.to_string
   let success_decoder = fn(val) {
-    // glam_json.json_to_doc(val)|>doc_
-    dynamic.field(
+    val
+    |> io.debug
+    |> dynamic.field(
       "data",
       dynamic.decode3(
         NavigateSuccess,
@@ -636,7 +635,7 @@ pub fn navigate_ship_to_waypoint(
         dynamic.field("fuel", decode_fuel()),
         dynamic.field("events", dynamic.list(decode_ship_condition_event())),
       ),
-    )(io.debug(val))
+    )
   }
 
   let failure_decoder = fn(val) {
@@ -727,16 +726,16 @@ pub type ShipTransaction {
   )
 }
 
-pub fn decode_ship_transaction() {
+pub fn decode_ship_transaction(dynamic: dynamic.Dynamic) {
   dynamic.decode6(
     ShipTransaction,
     dynamic.field("waypointSymbol", dynamic.string),
     dynamic.field("shipSymbol", dynamic.string),
-    dynamic.field("shipType", decode_ship_type()),
+    dynamic.field("shipType", decode_ship_type),
     dynamic.field("price", dynamic.int),
     dynamic.field("agentSymbol", dynamic.string),
     dynamic.field("timestamp", dynamic.string),
-  )
+  )(dynamic)
 }
 
 pub type ShipType {
@@ -754,32 +753,30 @@ pub type ShipType {
   ShipSurveyor
 }
 
-pub fn decode_ship_type() {
-  fn(val) {
-    use raw_ship_type <- result.try(dynamic.string(val))
+pub fn decode_ship_type(val: dynamic.Dynamic) {
+  use raw_ship_type <- result.try(dynamic.string(val))
 
-    case raw_ship_type {
-      "SHIP_PROBE" -> Ok(ShipProbe)
-      "SHIP_MINING_DRONE" -> Ok(ShipMiningDrone)
-      "SHIP_SIPHON_DRONE" -> Ok(ShipSiphonDrone)
-      "SHIP_INTERCEPTOR" -> Ok(ShipInterceptor)
-      "SHIP_LIGHT_HAULER" -> Ok(ShipLightHauler)
-      "SHIP_COMMAND_FRIGATE" -> Ok(ShipCommandFrigate)
-      "SHIP_EXPLORER" -> Ok(ShipExplorer)
-      "SHIP_HEAVY_FREIGHTER" -> Ok(ShipHeavyFreighter)
-      "SHIP_LIGHT_SHUTTLE" -> Ok(ShipLightShuttle)
-      "SHIP_ORE_HOUND" -> Ok(ShipOreHound)
-      "SHIP_REFINING_FREIGHTER" -> Ok(ShipRefiningFreighter)
-      "SHIP_SURVEYOR" -> Ok(ShipSurveyor)
-      _ ->
-        Error([
-          dynamic.DecodeError(
-            expected: "SHIP_PROBE etc",
-            found: raw_ship_type,
-            path: ["idk"],
-          ),
-        ])
-    }
+  case raw_ship_type {
+    "SHIP_PROBE" -> Ok(ShipProbe)
+    "SHIP_MINING_DRONE" -> Ok(ShipMiningDrone)
+    "SHIP_SIPHON_DRONE" -> Ok(ShipSiphonDrone)
+    "SHIP_INTERCEPTOR" -> Ok(ShipInterceptor)
+    "SHIP_LIGHT_HAULER" -> Ok(ShipLightHauler)
+    "SHIP_COMMAND_FRIGATE" -> Ok(ShipCommandFrigate)
+    "SHIP_EXPLORER" -> Ok(ShipExplorer)
+    "SHIP_HEAVY_FREIGHTER" -> Ok(ShipHeavyFreighter)
+    "SHIP_LIGHT_SHUTTLE" -> Ok(ShipLightShuttle)
+    "SHIP_ORE_HOUND" -> Ok(ShipOreHound)
+    "SHIP_REFINING_FREIGHTER" -> Ok(ShipRefiningFreighter)
+    "SHIP_SURVEYOR" -> Ok(ShipSurveyor)
+    _ ->
+      Error([
+        dynamic.DecodeError(
+          expected: "SHIP_PROBE etc",
+          found: raw_ship_type,
+          path: ["idk"],
+        ),
+      ])
   }
 }
 
@@ -828,8 +825,8 @@ pub fn purchase_ship(
       dynamic.decode3(
         fn(agent, ship, transaction) { #(agent, ship, transaction) },
         dynamic.field("agent", st_agent.decode_agent),
-        dynamic.field("ship", decode_ship()),
-        dynamic.field("transation", decode_ship_transaction()),
+        dynamic.field("ship", decode_ship),
+        dynamic.field("transation", decode_ship_transaction),
       ),
     )
   }

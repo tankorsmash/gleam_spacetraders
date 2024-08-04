@@ -13,10 +13,7 @@ import gleam/option
 import gleam/result
 import gleam/string
 import gleeunit/should
-import pprint.{
-  type BitArrayMode, type Config, type LabelMode, type StyleMode,
-  BitArraysAsString, NoLabels, Styled, Unstyled,
-}
+import pprint
 
 pub type FalconResult(data) =
   Result(FalconResponse(data), FalconError)
@@ -201,46 +198,47 @@ pub fn create_my_ships_request() -> request.Request(String) {
   create_request(path)
 }
 
-pub fn test_efetch(decoder) {
+pub fn test_efetch(req: request.Request(String), decoder) {
   // let req = create_my_agent_request()
-  let req = create_my_ships_request()
   // use result_response <- efetch.send(req)
   let result_response = efetch.send(req)
 
   result_response
   |> fn(r: Result(response.Response(String), efetch.HttpError)) {
-    r
-    // case r {
-    //   Ok(response) -> {
-    //     response
-    //     // |> pprint.debug
-    //     |> fn(r: response.Response(String)) { r.body }
-    //     |> json.decode(decoder)
-    //     |> fn(decode_result) {
-    //       case decode_result {
-    //         Ok(Ok(data)) -> {
-    //           data
-    //           |> pprint.with_config(pprint.Config(
-    //             Styled,
-    //             BitArraysAsString,
-    //             pprint.Labels,
-    //           ))
-    //         }
-    //         Ok(Error(_)) -> {
-    //           "Error decoding"
-    //         }
-    //         Error(err) -> {
-    //           err
-    //           |> pprint.format
-    //         }
-    //       }
-    //     }
-    //     |> pprint.format
-    //   }
-    //   Error(err) -> {
-    //     err
-    //     |> pprint.format
-    //   }
-    // }
+    case r {
+      Ok(response) -> {
+        response
+        // |> pprint.debug
+        |> fn(r: response.Response(String)) { r.body }
+        |> json.decode(decoder)
+        |> fn(decode_result) {
+          decode_result
+          |> pprint.styled
+          |> io.println
+          // case decode_result {
+          //   Ok(Ok(data)) -> {
+          //     data
+          //     |> pprint.with_config(pprint.Config(
+          //       pprint.Styled,
+          //       pprint.BitArraysAsString,
+          //       pprint.Labels,
+          //     ))
+          //   }
+          //   Ok(Error(_)) -> {
+          //     "Error decoding"
+          //   }
+          //   Error(err) -> {
+          //     err
+          //     |> pprint.format
+          //   }
+          // }
+        }
+        |> pprint.format
+      }
+      Error(err) -> {
+        err
+        |> pprint.format
+      }
+    }
   }
 }

@@ -11,7 +11,6 @@ import falcon/core.{Url}
 import gleam/dynamic
 import gleam/erlang/os
 import gleam/erlang/process
-import gleam/http/request
 import gleam/int
 import gleam/io
 import gleam/json
@@ -19,7 +18,6 @@ import gleam/list
 import gleam/option
 import gleam/string
 
-import efetch
 import radiate
 
 // spacetraders
@@ -39,7 +37,6 @@ import glint/flag
 import glint/flag/constraint
 
 //local
-import app/app
 import message
 
 /// Creates a spacetraders-authorized client with the token from the environment
@@ -531,7 +528,7 @@ pub fn purchase_ship(input: glint.CommandInput) -> String {
     flag.get_string(from: input.flags, for: ship_type_name)
 
   let assert Ok(ship_type) =
-    st_ship.decode_ship_type()(dynamic.from(raw_ship_type))
+    st_ship.decode_ship_type(dynamic.from(raw_ship_type))
 
   let assert Ok(waypoint_symbol) =
     flag.get_string(from: input.flags, for: waypoint_flag_name)
@@ -724,14 +721,21 @@ fn loop(subject: process.Subject(Nil)) {
 
   // handle_cli()
   // st_response.create_my_agent_request()
-  // let decoder = st_agent.decode_agent()
-  let decoder = st_ship.decode_ships()
+  // let decoder = st_agent.decode_agent
+
+  // let req = st_response.create_my_ships_request()
+  // let decoder = st_ship.decode_ships
+
+  let req = st_response.create_my_agent_request()
+  let decoder = st_agent.decode_agent
+
   let resp =
     st_response.test_efetch(
+      req,
       // st_response.decode_data(st_response.decode_api_response(decoder)),
       st_response.decode_data(decoder),
     )
-  pprint.debug(resp)
+  // pprint.debug(resp)
 
   loop(subject)
 }
