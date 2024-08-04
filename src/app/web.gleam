@@ -19,10 +19,10 @@ pub fn middleware(
   let req = wisp.method_override(req)
 
   // Log information about the request and response.
-  use <- wisp.log_request(req)
+  // use <- wisp.log_request(req) //disabled for lustre
 
   // Return a default 500 response if the request handler crashes.
-  use <- wisp.rescue_crashes
+  // use <- wisp.rescue_crashes //disabled for lustre
 
   // Rewrite HEAD requests to GET requests and return an empty body.
   use req <- wisp.handle_head(req)

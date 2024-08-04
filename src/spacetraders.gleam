@@ -706,7 +706,7 @@ pub fn main() {
 
   let timer_subject = process.new_subject()
 
-  app.main()
+  // app.main()
 
   // loop(timer_subject)
 }

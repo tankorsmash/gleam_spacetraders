@@ -3,7 +3,8 @@ import gleam/erlang/process
 import mist
 import wisp
 
-pub fn main() {
+@external(javascript, "NOT", "IMPLEMENTED")
+pub fn main() ->Nil {
   // This sets the logger to print INFO level logs, and other sensible defaults
   // for a web application.
   wisp.configure_logger()
