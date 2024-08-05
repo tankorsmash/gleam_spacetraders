@@ -171,28 +171,30 @@ pub type ShipyardShip {
 
 pub fn decode_shipyard_ship(val: dynamic.Dynamic) {
   let triple_decoder =
-    dynamic.decode3(
-      fn(t, n, d) { #(t, n, d) },
+    val
+    |> dynamic.tuple3(
       dynamic.field("type", dynamic.string),
       dynamic.field("name", dynamic.string),
       dynamic.field("description", dynamic.string),
     )
-  use #(type_, name, description) <- result.try(triple_decoder(val))
-
-  use res <- result.map(dynamic.decode9(
-    fn(d, a, p, f, r, e, mo, moun, crew) {
-      ShipyardShip(type_, name, description, d, a, p, f, r, e, mo, moun, crew)
-    },
-    dynamic.field("supply", dynamic.string),
-    dynamic.field("activity", dynamic.string),
-    dynamic.field("purchasePrice", dynamic.int),
-    dynamic.field("frame", st_ship.decode_frame),
-    dynamic.field("reactor", st_ship.decode_reactor),
-    dynamic.field("engine", st_ship.decode_engine),
-    dynamic.field("modules", dynamic.list(st_ship.decode_module)),
-    dynamic.field("mounts", dynamic.list(st_ship.decode_mount)),
-    dynamic.field("crew", decode_shipyard_crew),
-  )(val))
+  use #(type_, name, description) <- result.try(triple_decoder)
+  use res <- result.map(
+    val
+    |> dynamic.decode9(
+      fn(d, a, p, f, r, e, mo, moun, crew) {
+        ShipyardShip(type_, name, description, d, a, p, f, r, e, mo, moun, crew)
+      },
+      dynamic.field("supply", dynamic.string),
+      dynamic.field("activity", dynamic.string),
+      dynamic.field("purchasePrice", dynamic.int),
+      dynamic.field("frame", st_ship.decode_frame),
+      dynamic.field("reactor", st_ship.decode_reactor),
+      dynamic.field("engine", st_ship.decode_engine),
+      dynamic.field("modules", dynamic.list(st_ship.decode_module)),
+      dynamic.field("mounts", dynamic.list(st_ship.decode_mount)),
+      dynamic.field("crew", decode_shipyard_crew),
+    ),
+  )
 
   res
 }
