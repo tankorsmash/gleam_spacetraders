@@ -102,8 +102,9 @@ pub type Market {
   )
 }
 
-pub fn decode_market_export() {
-  dynamic.decode3(
+pub fn decode_market_export(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     MarketExport,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
@@ -111,8 +112,9 @@ pub fn decode_market_export() {
   )
 }
 
-pub fn decode_market_import() {
-  dynamic.decode3(
+pub fn decode_market_import(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     MarketImport,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
@@ -120,8 +122,9 @@ pub fn decode_market_import() {
   )
 }
 
-pub fn decode_market_exchange() {
-  dynamic.decode3(
+pub fn decode_market_exchange(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     MarketExchange,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
@@ -129,8 +132,9 @@ pub fn decode_market_exchange() {
   )
 }
 
-pub fn decode_market_transaction() {
-  dynamic.decode8(
+pub fn decode_market_transaction(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode8(
     MarketTransaction,
     dynamic.field("waypointSymbol", dynamic.string),
     dynamic.field("shipSymbol", dynamic.string),
@@ -143,8 +147,9 @@ pub fn decode_market_transaction() {
   )
 }
 
-pub fn decode_market_trade_good() {
-  dynamic.decode7(
+pub fn decode_market_trade_good(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode7(
     MarketTradeGood,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("type", dynamic.string),
@@ -156,15 +161,16 @@ pub fn decode_market_trade_good() {
   )
 }
 
-pub fn decode_market() {
-  dynamic.decode6(
+pub fn decode_market(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Market,
     dynamic.field("symbol", dynamic.string),
-    dynamic.field("exports", dynamic.list(decode_market_export())),
-    dynamic.field("imports", dynamic.list(decode_market_import())),
-    dynamic.field("exchange", dynamic.list(decode_market_exchange())),
-    dynamic.field("transactions", dynamic.list(decode_market_transaction())),
-    dynamic.field("tradeGoods", dynamic.list(decode_market_trade_good())),
+    dynamic.field("exports", dynamic.list(decode_market_export)),
+    dynamic.field("imports", dynamic.list(decode_market_import)),
+    dynamic.field("exchange", dynamic.list(decode_market_exchange)),
+    dynamic.field("transactions", dynamic.list(decode_market_transaction)),
+    dynamic.field("tradeGoods", dynamic.list(decode_market_trade_good)),
   )
 }
 
@@ -173,7 +179,7 @@ pub fn view_market(
   system_symbol: String,
   waypoint_symbol: String,
 ) -> st_response.FalconResult(Market) {
-  let decoder = st_response.decode_data(decode_market())
+  let decoder = st_response.decode_data(decode_market)
   let url =
     "systems/" <> system_symbol <> "/waypoints/" <> waypoint_symbol <> "/market"
   client

@@ -143,8 +143,9 @@ pub type ShipyardCrew {
   ShipyardCrew(required: Int, capacity: Int)
 }
 
-pub fn decode_shipyard_crew() {
-  dynamic.decode2(
+pub fn decode_shipyard_crew(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode2(
     ShipyardCrew,
     dynamic.field("required", dynamic.int),
     dynamic.field("capacity", dynamic.int),
@@ -168,42 +169,42 @@ pub type ShipyardShip {
   )
 }
 
-pub fn decode_shipyard_ship() {
-  fn(val) {
-    let triple_decoder =
-      dynamic.decode3(
-        fn(t, n, d) { #(t, n, d) },
-        dynamic.field("type", dynamic.string),
-        dynamic.field("name", dynamic.string),
-        dynamic.field("description", dynamic.string),
-      )
-    use #(type_, name, description) <- result.try(triple_decoder(val))
+pub fn decode_shipyard_ship(val: dynamic.Dynamic) {
+  let triple_decoder =
+    dynamic.decode3(
+      fn(t, n, d) { #(t, n, d) },
+      dynamic.field("type", dynamic.string),
+      dynamic.field("name", dynamic.string),
+      dynamic.field("description", dynamic.string),
+    )
+  use #(type_, name, description) <- result.try(triple_decoder(val))
 
-    use res <- result.map(dynamic.decode9(
-      fn(d, a, p, f, r, e, mo, moun, crew) {
-        ShipyardShip(type_, name, description, d, a, p, f, r, e, mo, moun, crew)
-      },
-      dynamic.field("supply", dynamic.string),
-      dynamic.field("activity", dynamic.string),
-      dynamic.field("purchasePrice", dynamic.int),
-      dynamic.field("frame", st_ship.decode_frame()),
-      dynamic.field("reactor", st_ship.decode_reactor()),
-      dynamic.field("engine", st_ship.decode_engine()),
-      dynamic.field("modules", dynamic.list(st_ship.decode_module())),
-      dynamic.field("mounts", dynamic.list(st_ship.decode_mount())),
-      dynamic.field("crew", decode_shipyard_crew()),
-    )(val))
+  use res <- result.map(dynamic.decode9(
+    fn(d, a, p, f, r, e, mo, moun, crew) {
+      ShipyardShip(type_, name, description, d, a, p, f, r, e, mo, moun, crew)
+    },
+    dynamic.field("supply", dynamic.string),
+    dynamic.field("activity", dynamic.string),
+    dynamic.field("purchasePrice", dynamic.int),
+    dynamic.field("frame", st_ship.decode_frame),
+    dynamic.field("reactor", st_ship.decode_reactor),
+    dynamic.field("engine", st_ship.decode_engine),
+    dynamic.field("modules", dynamic.list(st_ship.decode_module)),
+    dynamic.field("mounts", dynamic.list(st_ship.decode_mount)),
+    dynamic.field("crew", decode_shipyard_crew),
+  )(val))
 
-    res
-  }
+  res
 }
 
-pub fn decode_ship_type() {
-  dynamic.decode1(ShipType, dynamic.field("type", dynamic.string))
+pub fn decode_ship_type(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode1(ShipType, dynamic.field("type", dynamic.string))
 }
 
-pub fn decode_transaction() {
-  dynamic.decode6(
+pub fn decode_transaction(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Transaction,
     dynamic.field("waypointSymbol", dynamic.string),
     dynamic.field("shipSymbol", dynamic.string),
@@ -214,19 +215,20 @@ pub fn decode_transaction() {
   )
 }
 
-pub fn decode_shipyard() {
-  dynamic.decode5(
+pub fn decode_shipyard(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode5(
     Shipyard,
     dynamic.field("symbol", dynamic.string),
-    dynamic.field("shipTypes", dynamic.list(decode_ship_type())),
+    dynamic.field("shipTypes", dynamic.list(decode_ship_type)),
     st_response.optional_field_with_default(
       "transactions",
-      dynamic.list(decode_transaction()),
+      dynamic.list(decode_transaction),
       [],
     ),
     st_response.optional_field_with_default(
       "ships",
-      dynamic.list(decode_shipyard_ship()),
+      dynamic.list(decode_shipyard_ship),
       [],
     ),
     dynamic.field("modificationsFee", dynamic.int),
@@ -245,7 +247,7 @@ pub fn view_available_ships(
       <> "/waypoints/"
       <> waypoint_symbol
       <> "/shipyard",
-    Json(fn(val) { dynamic.field("data", decode_shipyard())(val) }),
+    Json(fn(val) { dynamic.field("data", decode_shipyard)(val) }),
     // Json(st_response.decode_response(dynamic.dynamic)),
     // Raw(dynamic.dynamic),
     [],

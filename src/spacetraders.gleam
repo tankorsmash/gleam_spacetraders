@@ -723,13 +723,13 @@ fn loop(subject: process.Subject(Nil)) {
   // st_response.create_my_agent_request()
   // let decoder = st_agent.decode_agent
 
-  // let req = st_response.create_my_ships_request()
-  // let decoder = st_ship.decode_ships
+  let req = st_response.create_my_ships_request()
+  let decoder = st_ship.decode_ships
 
-  let req = st_response.create_my_agent_request()
-  let decoder = st_agent.decode_agent
+  // let req = st_response.create_my_agent_request()
+  // let decoder = st_agent.decode_agent
 
-  let resp =
+  let _resp =
     st_response.test_efetch(
       req,
       // st_response.decode_data(st_response.decode_api_response(decoder)),

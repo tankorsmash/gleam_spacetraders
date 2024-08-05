@@ -301,9 +301,9 @@ pub fn decode_ship(value: dynamic.Dynamic) {
   use #(s, r, n, c) <- result.try(dynamic.decode4(
     fn(s, r, n, c) { #(s, r, n, c) },
     dynamic.field("symbol", dynamic.string),
-    dynamic.field("registration", decode_registration()),
-    dynamic.field("nav", decode_nav()),
-    dynamic.field("crew", decode_crew()),
+    dynamic.field("registration", decode_registration),
+    dynamic.field("nav", decode_nav),
+    dynamic.field("crew", decode_crew),
   )(value))
 
   dynamic.decode8(
@@ -314,19 +314,20 @@ pub fn decode_ship(value: dynamic.Dynamic) {
     //   dynamic.field("registration", decode_registration),
     //   dynamic.field("nav", decode_nav),
     //   dynamic.field("crew", decode_crew),
-    dynamic.field("frame", decode_frame()),
-    dynamic.field("reactor", decode_reactor()),
-    dynamic.field("engine", decode_engine()),
-    dynamic.field("cooldown", decode_cooldown()),
-    dynamic.field("modules", dynamic.list(decode_module())),
-    dynamic.field("mounts", dynamic.list(decode_mount())),
-    dynamic.field("cargo", decode_cargo()),
-    dynamic.field("fuel", decode_fuel()),
+    dynamic.field("frame", decode_frame),
+    dynamic.field("reactor", decode_reactor),
+    dynamic.field("engine", decode_engine),
+    dynamic.field("cooldown", decode_cooldown),
+    dynamic.field("modules", dynamic.list(decode_module)),
+    dynamic.field("mounts", dynamic.list(decode_mount)),
+    dynamic.field("cargo", decode_cargo),
+    dynamic.field("fuel", decode_fuel),
   )(value)
 }
 
-pub fn decode_registration() {
-  dynamic.decode3(
+pub fn decode_registration(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     Registration,
     dynamic.field("name", dynamic.string),
     dynamic.field("factionSymbol", dynamic.string),
@@ -334,29 +335,32 @@ pub fn decode_registration() {
   )
 }
 
-pub fn decode_nav() {
-  dynamic.decode5(
+pub fn decode_nav(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode5(
     Nav,
     dynamic.field("systemSymbol", dynamic.string),
     dynamic.field("waypointSymbol", dynamic.string),
-    dynamic.field("route", decode_route()),
+    dynamic.field("route", decode_route),
     dynamic.field("status", dynamic.string),
     dynamic.field("flightMode", dynamic.string),
   )
 }
 
-pub fn decode_route() {
-  dynamic.decode4(
+pub fn decode_route(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode4(
     Route,
-    dynamic.field("destination", decode_destination()),
-    dynamic.field("origin", decode_origin()),
+    dynamic.field("destination", decode_destination),
+    dynamic.field("origin", decode_origin),
     dynamic.field("departureTime", dynamic.string),
     dynamic.field("arrival", dynamic.string),
   )
 }
 
-pub fn decode_destination() {
-  dynamic.decode5(
+pub fn decode_destination(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode5(
     Destination,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("type", dynamic.string),
@@ -366,8 +370,9 @@ pub fn decode_destination() {
   )
 }
 
-pub fn decode_origin() {
-  dynamic.decode5(
+pub fn decode_origin(value: dynamic.Dynamic) {
+  value
+  |> dynamic.decode5(
     Origin,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("type", dynamic.string),
@@ -377,8 +382,9 @@ pub fn decode_origin() {
   )
 }
 
-pub fn decode_crew() {
-  dynamic.decode6(
+pub fn decode_crew(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Crew,
     dynamic.field("current", dynamic.int),
     dynamic.field("required", dynamic.int),
@@ -389,8 +395,9 @@ pub fn decode_crew() {
   )
 }
 
-pub fn decode_frame() {
-  dynamic.decode8(
+pub fn decode_frame(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode8(
     Frame,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
@@ -399,7 +406,7 @@ pub fn decode_frame() {
     dynamic.field("moduleSlots", dynamic.int),
     dynamic.field("mountingPoints", dynamic.int),
     dynamic.field("fuelCapacity", dynamic.int),
-    dynamic.field("requirements", decode_requirements()),
+    dynamic.field("requirements", decode_requirements),
   )
 }
 
@@ -419,8 +426,9 @@ pub type ShipConditionEvent {
   )
 }
 
-pub fn decode_ship_condition_event() {
-  dynamic.decode4(
+pub fn decode_ship_condition_event(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode4(
     ShipConditionEvent,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("component", dynamic.string),
@@ -437,7 +445,8 @@ pub fn optional_field_with_default(field_name, decoder, def) {
   }
 }
 
-pub fn decode_requirements() {
+pub fn decode_requirements(dynamic: dynamic.Dynamic) {
+  dynamic
   //   |> 
   //   |> Ok
   //   |> result.map(fn(a) { a })
@@ -450,7 +459,7 @@ pub fn decode_requirements() {
   //     fn(_) { 0 },
   //   )
   // }
-  dynamic.decode3(
+  |> dynamic.decode3(
     Requirements,
     // dynamic.field("power", dynamic.int),
     // dynamic.field("crew", dynamic.int),
@@ -477,32 +486,35 @@ pub fn decode_requirements() {
   )
 }
 
-pub fn decode_reactor() {
-  dynamic.decode6(
+pub fn decode_reactor(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Reactor,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
     dynamic.field("condition", dynamic.int),
     dynamic.field("powerOutput", dynamic.int),
-    dynamic.field("requirements", decode_requirements()),
+    dynamic.field("requirements", decode_requirements),
   )
 }
 
-pub fn decode_engine() {
-  dynamic.decode6(
+pub fn decode_engine(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Engine,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
     dynamic.field("condition", dynamic.int),
     dynamic.field("speed", dynamic.int),
-    dynamic.field("requirements", decode_requirements()),
+    dynamic.field("requirements", decode_requirements),
   )
 }
 
-pub fn decode_cooldown() {
-  dynamic.decode4(
+pub fn decode_cooldown(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode4(
     Cooldown,
     dynamic.field("shipSymbol", dynamic.string),
     dynamic.field("totalSeconds", dynamic.int),
@@ -511,41 +523,45 @@ pub fn decode_cooldown() {
   )
 }
 
-pub fn decode_module() {
-  dynamic.decode6(
+pub fn decode_module(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Module,
     dynamic.field("symbol", dynamic.string),
     dynamic.optional_field("capacity", dynamic.int),
     dynamic.optional_field("range", dynamic.int),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
-    dynamic.field("requirements", decode_requirements()),
+    dynamic.field("requirements", decode_requirements),
   )
 }
 
-pub fn decode_mount() {
-  dynamic.decode6(
+pub fn decode_mount(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode6(
     Mount,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
     dynamic.optional_field("strength", dynamic.int),
     optional_field_with_default("deposits", dynamic.list(dynamic.string), []),
-    dynamic.field("requirements", decode_requirements()),
+    dynamic.field("requirements", decode_requirements),
   )
 }
 
-pub fn decode_cargo() {
-  dynamic.decode3(
+pub fn decode_cargo(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     Cargo,
     dynamic.field("capacity", dynamic.int),
     dynamic.field("units", dynamic.int),
-    dynamic.field("inventory", dynamic.list(decode_inventory())),
+    dynamic.field("inventory", dynamic.list(decode_inventory)),
   )
 }
 
-pub fn decode_inventory() {
-  dynamic.decode4(
+pub fn decode_inventory(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode4(
     Inventory,
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
@@ -554,17 +570,19 @@ pub fn decode_inventory() {
   )
 }
 
-pub fn decode_fuel() {
-  dynamic.decode3(
+pub fn decode_fuel(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     Fuel,
     dynamic.field("current", dynamic.int),
     dynamic.field("capacity", dynamic.int),
-    dynamic.field("consumed", decode_consumed()),
+    dynamic.field("consumed", decode_consumed),
   )
 }
 
-pub fn decode_consumed() {
-  dynamic.decode2(
+pub fn decode_consumed(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode2(
     Consumed,
     dynamic.field("amount", dynamic.int),
     dynamic.field("timestamp", dynamic.string),
@@ -595,7 +613,7 @@ pub fn set_ship_to_orbit(client: falcon.Client, ship_symbol: String) {
   client
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/orbit",
-    Json(dynamic.field("data", dynamic.field("nav", decode_nav()))),
+    Json(dynamic.field("data", dynamic.field("nav", decode_nav))),
     options: [],
     body: "",
   )
@@ -605,7 +623,7 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
   client
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/dock",
-    Json(dynamic.field("data", dynamic.field("nav", decode_nav()))),
+    Json(dynamic.field("data", dynamic.field("nav", decode_nav))),
     options: [],
     body: "",
   )
@@ -631,9 +649,9 @@ pub fn navigate_ship_to_waypoint(
       "data",
       dynamic.decode3(
         NavigateSuccess,
-        dynamic.field("nav", decode_nav()),
-        dynamic.field("fuel", decode_fuel()),
-        dynamic.field("events", dynamic.list(decode_ship_condition_event())),
+        dynamic.field("nav", decode_nav),
+        dynamic.field("fuel", decode_fuel),
+        dynamic.field("events", dynamic.list(decode_ship_condition_event)),
       ),
     )
   }
@@ -673,11 +691,8 @@ pub fn refuel_ship(
     dynamic.decode3(
       RefuelSuccess,
       dynamic.field("agent", st_agent.decode_agent),
-      dynamic.field("fuel", decode_fuel()),
-      dynamic.optional_field(
-        "transation",
-        st_market.decode_market_transaction(),
-      ),
+      dynamic.field("fuel", decode_fuel),
+      dynamic.optional_field("transation", st_market.decode_market_transaction),
     )
   let _failure_decoder =
     dynamic.decode1(RefuelFailure, dynamic.field("message", dynamic.string))

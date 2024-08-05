@@ -252,9 +252,9 @@ pub fn test_efetch(req: request.Request(String), decoder) {
   |> fn(r: Result(response.Response(String), efetch.HttpError)) {
     case r {
       Ok(response) -> {
-        response.headers
-        |> parse_headers_for_rate_limit
-        |> pprint.debug
+        let _result_rate_limit =
+          response.headers
+          |> parse_headers_for_rate_limit
 
         response
         // |> pprint.debug
