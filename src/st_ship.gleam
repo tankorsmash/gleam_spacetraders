@@ -623,7 +623,7 @@ pub fn set_ship_to_dock(client: falcon.Client, ship_symbol: String) {
   client
   |> falcon.post(
     "/my/ships/" <> ship_symbol <> "/dock",
-    Json(dynamic.field("data", dynamic.field("nav", decode_nav))),
+    Json(st_response.decode_data(dynamic.field("nav", decode_nav))),
     options: [],
     body: "",
   )
@@ -837,8 +837,7 @@ pub fn purchase_ship(
   let valid_decoder = fn() {
     dynamic.field(
       "data",
-      dynamic.decode3(
-        fn(agent, ship, transaction) { #(agent, ship, transaction) },
+      dynamic.tuple3(
         dynamic.field("agent", st_agent.decode_agent),
         dynamic.field("ship", decode_ship),
         dynamic.field("transation", decode_ship_transaction),

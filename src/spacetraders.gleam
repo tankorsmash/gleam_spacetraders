@@ -601,6 +601,7 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.set_ship_to_dock(ship_symbol)
     |> st_response.expect_200_body_result
+    // |> pprint.debug
 
   pretty_nav(nav)
   // nav
@@ -693,7 +694,8 @@ pub fn handle_cli() -> Nil {
         |> glint.description("view market for a given waypoint"),
     )
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
-      io.println("the returned value is:\n" <> x)
+      io.println("the returned value is:")
+      pprint.debug(x)
     })
 }
 
@@ -713,29 +715,24 @@ pub fn main() {
 }
 
 fn loop(subject: process.Subject(Nil)) {
-  process.send_after(subject, 2000, Nil)
-
-  let _ = process.receive(subject, 2500)
-
   io.debug(message.get_message())
 
-  // handle_cli()
-  // st_response.create_my_agent_request()
-  // let decoder = st_agent.decode_agent
+  handle_cli()
 
-  let req = st_response.create_my_ships_request()
-  let decoder = st_ship.decode_ships
+  // let req = st_response.create_my_ships_request()
+  // let decoder = st_ship.decode_ships
+  //
+  // // let req = st_response.create_my_agent_request()
+  // // let decoder = st_agent.decode_agent
+  //
+  // let _resp =
+  //   st_response.test_efetch(
+  //     req,
+  //     st_response.decode_data(decoder),
+  //   )
 
-  // let req = st_response.create_my_agent_request()
-  // let decoder = st_agent.decode_agent
-
-  let _resp =
-    st_response.test_efetch(
-      req,
-      // st_response.decode_data(st_response.decode_api_response(decoder)),
-      st_response.decode_data(decoder),
-    )
-  // pprint.debug(resp)
-
+  let sleep_duration = 2000
+  process.send_after(subject, sleep_duration, Nil)
+  let _ = process.receive(subject, sleep_duration + 500)
   loop(subject)
 }
