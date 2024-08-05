@@ -5,6 +5,7 @@ import gleam/io
 import gleam/json
 import gleam/option.{type Option}
 import gleam/result
+import pprint
 import st_agent
 import st_market
 import st_response
@@ -850,4 +851,56 @@ pub fn purchase_ship(
   // }
   client
   |> falcon.post("/my/ships/", Json(valid_decoder()), options: [], body: body)
+}
+
+pub type Yield {
+  Yield(symbol: String, units: Int)
+}
+
+pub fn decode_yield(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode2(
+    Yield,
+    dynamic.field("symbol", dynamic.string),
+    dynamic.field("units", dynamic.int),
+  )
+}
+
+pub type Extraction {
+  Extraction(ship_symbol: String, yield: Yield)
+}
+
+pub fn decode_extraction(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode2(
+    Extraction,
+    dynamic.field("shipSymbol", dynamic.string),
+    dynamic.field("yield", decode_yield),
+  )
+}
+
+pub type ExtractionOutput {
+  ExtractionOutput(
+    cooldown: Cooldown,
+    extraction: Extraction,
+    cargo: Cargo,
+    events: List(dynamic.Dynamic),
+  )
+}
+
+pub fn set_ship_to_extract_resources(client: falcon.Client, ship_symbol: String) {
+  let url =
+     "/my/ships/" <> ship_symbol <> "/extract" 
+
+  let decoder =
+    st_response.decode_api_response(dynamic.decode4(
+      ExtractionOutput,
+      dynamic.field("cooldown", decode_cooldown),
+      dynamic.field("extraction", decode_extraction),
+      dynamic.field("cargo", decode_cargo),
+      dynamic.field("events", dynamic.list(dynamic.dynamic)),
+    ))
+
+  client
+  |> falcon.post(url, Json(decoder), options: [], body: "")
 }

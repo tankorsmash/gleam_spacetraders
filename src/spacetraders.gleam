@@ -601,11 +601,26 @@ pub fn set_ship_to_dock(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.set_ship_to_dock(ship_symbol)
     |> st_response.expect_200_body_result
-    // |> pprint.debug
+  // |> pprint.debug
 
   pretty_nav(nav)
   // nav
   // |> string.inspect
+}
+
+pub fn set_ship_to_extract(input: glint.CommandInput) -> String {
+  io.println("setting ship to extract")
+  let assert Ok(ship_symbol) =
+    flag.get_string(from: input.flags, for: ship_symbol_name)
+  io.println("extracting with ship: " <> ship_symbol)
+  let nav =
+    create_client()
+    |> st_ship.set_ship_to_extract_resources(ship_symbol)
+    // |> st_response.expect_200_body_result
+    |> pprint.debug
+    // pretty_nav(nav)
+    // nav
+    |> string.inspect
 }
 
 pub fn handle_cli() -> Nil {
@@ -650,6 +665,12 @@ pub fn handle_cli() -> Nil {
       do: glint.command(set_ship_to_dock)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to dock"),
+    )
+    |> glint.add(
+      at: ["extract_resources"],
+      do: glint.command(set_ship_to_extract)
+        |> glint.flag(ship_symbol_name, ship_symbol_flag())
+        |> glint.description("set ship to extract resources"),
     )
     |> glint.add(
       at: ["refuel_ship"],

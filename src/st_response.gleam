@@ -39,8 +39,9 @@ pub type ApiError(data) {
 pub type ApiResult(data) =
   FalconResult(Result(data, ApiError(dynamic.Dynamic)))
 
-pub fn decode_api_error() {
-  dynamic.decode3(
+pub fn decode_api_error(dynamic: dynamic.Dynamic) {
+  dynamic
+  |> dynamic.decode3(
     ApiError,
     dynamic.field("error", dynamic.field("code", dynamic.int)),
     dynamic.field("error", dynamic.field("message", dynamic.string)),
@@ -51,7 +52,7 @@ pub fn decode_api_error() {
 pub fn decode_api_response(success_decoder) {
   dynamic.any([
     dynamic.decode1(Ok, success_decoder),
-    dynamic.decode1(Error, decode_api_error()),
+    dynamic.decode1(Error, decode_api_error),
   ])
 }
 
@@ -160,6 +161,13 @@ pub fn string_format_decode_errors(errors: List(dynamic.DecodeError)) -> String 
 pub fn debug_decoder(decoder) {
   fn(val) {
     io.debug(val)
+    decoder(val)
+  }
+}
+
+pub fn pprint_decoder(decoder) {
+  fn(val) {
+    pprint.debug(val)
     decoder(val)
   }
 }
