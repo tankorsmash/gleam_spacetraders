@@ -39,7 +39,7 @@ pub fn decode_agent(dynamic: dynamic.Dynamic) {
 
 pub fn get_my_agent(client) {
   client
-  |> falcon.get("/my/agent", Json(st_response.decode_data(decode_agent)), [])
+  |> falcon.get("/my/agent", Json(st_response.decode_api_response(decode_agent)), [])
 }
 
 pub fn register_agent(

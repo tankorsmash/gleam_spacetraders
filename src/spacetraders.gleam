@@ -344,59 +344,66 @@ fn view_market(input: glint.CommandInput) -> String {
     resp
     |> st_response.expect_200_body_result
 
-  let exports = market.exports
-  let imports = market.imports
-  let exchange = market.exchange
-  let _transactions = market.transactions
-  let trade_goods = market.trade_goods
+  case market {
+    Ok(market) -> {
+      let exports = market.exports
+      let imports = market.imports
+      let exchange = market.exchange
+      let _transactions = market.transactions
+      let trade_goods = market.trade_goods
 
-  let export_string =
-    exports
-    |> list.map(fn(export: st_market.MarketExport) {
-      export.symbol <> " " <> export.name
-    })
-    |> string.join(", ")
+      let export_string =
+        exports
+        |> list.map(fn(export: st_market.MarketExport) {
+          export.symbol <> " " <> export.name
+        })
+        |> string.join(", ")
 
-  let import_string =
-    imports
-    |> list.map(fn(import_: st_market.MarketImport) {
-      import_.symbol <> " " <> import_.name
-    })
-    |> string.join(", ")
+      let import_string =
+        imports
+        |> list.map(fn(import_: st_market.MarketImport) {
+          import_.symbol <> " " <> import_.name
+        })
+        |> string.join(", ")
 
-  let exchange_string =
-    exchange
-    |> list.map(fn(exchange: st_market.MarketExchange) {
-      exchange.symbol <> " " <> exchange.name
-    })
-    |> string.join(", ")
-  let trade_goods_string =
-    trade_goods
-    |> list.map(fn(trade_good: st_market.MarketTradeGood) {
-      "  - "
-      <> trade_good.symbol
-      <> " ["
-      <> trade_good.type_
-      <> "] vol:"
-      <> int.to_string(trade_good.trade_volume)
-      <> ", "
-      <> trade_good.supply
-      <> " supply,"
-      <> " +"
-      <> int.to_string(trade_good.purchase_price)
-      <> "/-"
-      <> int.to_string(trade_good.sell_price)
-    })
-    |> string.join("\n")
+      let exchange_string =
+        exchange
+        |> list.map(fn(exchange: st_market.MarketExchange) {
+          exchange.symbol <> " " <> exchange.name
+        })
+        |> string.join(", ")
+      let trade_goods_string =
+        trade_goods
+        |> list.map(fn(trade_good: st_market.MarketTradeGood) {
+          "  - "
+          <> trade_good.symbol
+          <> " ["
+          <> trade_good.type_
+          <> "] vol:"
+          <> int.to_string(trade_good.trade_volume)
+          <> ", "
+          <> trade_good.supply
+          <> " supply,"
+          <> " +"
+          <> int.to_string(trade_good.purchase_price)
+          <> "/-"
+          <> int.to_string(trade_good.sell_price)
+        })
+        |> string.join("\n")
 
-  "Imports:\n "
-  <> import_string
-  <> "\nExports:\n "
-  <> export_string
-  <> "\nExchange:\n "
-  <> exchange_string
-  <> "\nTrade Goods $(buying/selling price):\n"
-  <> trade_goods_string
+      "Imports:\n "
+      <> import_string
+      <> "\nExports:\n "
+      <> export_string
+      <> "\nExchange:\n "
+      <> exchange_string
+      <> "\nTrade Goods $(buying/selling price):\n"
+      <> trade_goods_string
+    }
+    Error(api_error) -> {
+      api_error.message <> "\n" <> string.inspect(api_error.data)
+    }
+  }
 }
 
 fn view_my_ships(_input: glint.CommandInput) -> String {

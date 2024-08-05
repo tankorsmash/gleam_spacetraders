@@ -178,8 +178,8 @@ pub fn view_market(
   client: falcon.Client,
   system_symbol: String,
   waypoint_symbol: String,
-) -> st_response.FalconResult(Market) {
-  let decoder = st_response.decode_data(decode_market)
+) -> st_response.ApiResult(Market) {
+  let decoder = st_response.decode_api_response(decode_market)
   let url =
     "systems/" <> system_symbol <> "/waypoints/" <> waypoint_symbol <> "/market"
   client

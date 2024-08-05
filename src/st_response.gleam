@@ -121,7 +121,7 @@ pub fn expect_body_result(resp: FalconResult(value)) -> value {
   // |> expect_status(200)
   |> core.extract_body
 }
-
+/// gets the body from a response, after making sure it's a 200
 pub fn expect_200_body_result(resp: FalconResult(value)) -> value {
   resp
   |> should.be_ok
