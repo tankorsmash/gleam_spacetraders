@@ -3,11 +3,13 @@ import dot_env
 // import dotenv/env
 
 import pprint
+import simplifile
 
 // import gleam_stdlib
 import falcon.{type Client}
 import falcon/core.{Url}
 
+import gleam/bool
 import gleam/dynamic
 import gleam/erlang/os
 import gleam/erlang/process
@@ -16,6 +18,7 @@ import gleam/io
 import gleam/json
 import gleam/list
 import gleam/option
+import gleam/result
 import gleam/string
 
 import radiate
@@ -628,98 +631,127 @@ pub fn set_ship_to_extract(input: glint.CommandInput) -> String {
     // pretty_nav(nav)
     // nav
     |> string.inspect
+  nav
 }
 
 pub fn handle_cli() -> Nil {
   let now = birl.now()
   io.println("the time is: " <> birl.to_iso8601(now))
-  let _ =
-    glint.new()
-    |> glint.with_name("spacetraders")
-    |> glint.with_pretty_help(glint.default_pretty_help())
-    |> glint.add(
-      at: ["agent"],
-      do: glint.command(view_agent)
+
+  // the commands to be run
+  let commands: List(#(List(String), glint.Command(String))) = [
+    #(
+      ["agent"],
+      glint.command(view_agent)
         |> glint.description("view your agent"),
-    )
-    |> glint.add(
-      at: ["register_agent"],
-      do: glint.command(register_agent)
+    ),
+    #(
+      ["register_agent"],
+      glint.command(register_agent)
         |> glint.flag(agent_name_flag_name, agent_name_flag())
         |> glint.flag(email_address_flag_name, email_name_flag())
         |> glint.description("register a new agent"),
-    )
-    |> glint.add(
-      at: ["my_ships"],
-      do: glint.command(view_my_ships)
+    ),
+    #(
+      ["my_ships"],
+      glint.command(view_my_ships)
         |> glint.description("view my ships"),
-    )
-    |> glint.add(
-      at: ["orbit_ship"],
-      do: glint.command(set_ship_to_orbit)
+    ),
+    #(
+      ["orbit_ship"],
+      glint.command(set_ship_to_orbit)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to orbit"),
-    )
-    |> glint.add(
-      at: ["navigate_ship"],
-      do: glint.command(set_ship_to_navigate)
+    ),
+    #(
+      ["navigate_ship"],
+      glint.command(set_ship_to_navigate)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("navigate ship to waypoint"),
-    )
-    |> glint.add(
-      at: ["dock_ship"],
-      do: glint.command(set_ship_to_dock)
+    ),
+    #(
+      ["dock_ship"],
+      glint.command(set_ship_to_dock)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to dock"),
-    )
-    |> glint.add(
-      at: ["extract_resources"],
-      do: glint.command(set_ship_to_extract)
+    ),
+    #(
+      ["extract_resources"],
+      glint.command(set_ship_to_extract)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("set ship to extract resources"),
-    )
-    |> glint.add(
-      at: ["refuel_ship"],
-      do: glint.command(refuel_ship)
+    ),
+    #(
+      ["refuel_ship"],
+      glint.command(refuel_ship)
         |> glint.flag(ship_symbol_name, ship_symbol_flag())
         |> glint.description("refuel docked ship"),
-    )
-    |> glint.add(
-      at: ["purchase_ship"],
-      do: glint.command(purchase_ship)
+    ),
+    #(
+      ["purchase_ship"],
+      glint.command(purchase_ship)
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.flag(ship_type_name, ship_type_flag())
         |> glint.description("purchase ship"),
-    )
-    |> glint.add(
-      at: ["waypoints"],
-      do: glint.command(view_waypoints)
+    ),
+    #(
+      ["waypoints"],
+      glint.command(view_waypoints)
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(traits_flag_name, traits_flag())
         |> glint.flag(waypoint_type_flag_name, waypoint_type_flag())
         |> glint.description("view waypoints for a given system"),
-    )
-    |> glint.add(
-      at: ["waypoint_info"],
-      do: glint.command(view_waypoint)
+    ),
+    #(
+      ["waypoint_info"],
+      glint.command(view_waypoint)
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view waypoints for a given system"),
-    )
-    |> glint.add(
-      at: ["shipyard"],
-      do: glint.command(view_shipyard)
+    ),
+    #(
+      ["shipyard"],
+      glint.command(view_shipyard)
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view shipyard for a given waypoint"),
-    )
-    |> glint.add(
-      at: ["market"],
-      do: glint.command(view_market)
+    ),
+    #(
+      ["market"],
+      glint.command(view_market)
         |> glint.flag(system_flag_name, system_flag())
         |> glint.flag(waypoint_flag_name, waypoint_flag())
         |> glint.description("view market for a given waypoint"),
+    ),
+  ]
+
+  let _ =
+    glint.new()
+    |> glint.with_name("Spacetraders CLI")
+    |> glint.with_pretty_help(glint.default_pretty_help())
+    // loop through commands to add them to glint
+    |> fn(glint_client) {
+      list.fold(commands, glint_client, fn(glint_client, name_command) {
+        let #(names, command) = name_command
+        glint.add(glint_client, at: names, do: command)
+      })
+    }
+    |> glint.add(
+      at: ["dump_args"],
+      do: glint.command(fn(_: glint.CommandInput) {
+        // list.map(commands, fn(cmd) { io.println(string.join(cmd.0, "\n")) })
+        let file_success =
+          list.map(commands, fn(cmd) { string.join(cmd.0, "\n") })
+          |> string.join("\n")
+          |> simplifile.write(to: "./commands.txt")
+        let file_success_string =
+          result.is_ok(file_success)
+          |> bool.to_string()
+
+        "wrote ./commands.txt to file: successfully?: " <> file_success_string
+
+      }),
     )
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {
       io.println("the returned value is:")
@@ -736,10 +768,11 @@ pub fn main() {
     |> radiate.add_dir("src")
     |> radiate.start()
 
-  let timer_subject = process.new_subject()
   // app.main()
 
-  loop(timer_subject)
+  handle_cli()
+  // let timer_subject = process.new_subject()
+  // loop(timer_subject)
 }
 
 fn loop(subject: process.Subject(Nil)) {

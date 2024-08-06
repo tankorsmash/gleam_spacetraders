@@ -5,7 +5,6 @@ import gleam/io
 import gleam/json
 import gleam/option.{type Option}
 import gleam/result
-import pprint
 import st_agent
 import st_market
 import st_response
