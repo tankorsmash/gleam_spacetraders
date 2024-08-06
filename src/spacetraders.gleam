@@ -623,15 +623,11 @@ pub fn set_ship_to_extract(input: glint.CommandInput) -> String {
   let assert Ok(ship_symbol) =
     flag.get_string(from: input.flags, for: ship_symbol_name)
   io.println("extracting with ship: " <> ship_symbol)
-  let nav =
+  let extraction_falcon_result =
     create_client()
     |> st_ship.set_ship_to_extract_resources(ship_symbol)
-    // |> st_response.expect_200_body_result
-    |> pprint.debug
-    // pretty_nav(nav)
-    // nav
-    |> string.inspect
-  nav
+  extraction_falcon_result
+  |> string.inspect
 }
 
 pub fn handle_cli() -> Nil {
@@ -750,7 +746,6 @@ pub fn handle_cli() -> Nil {
           |> bool.to_string()
 
         "wrote ./commands.txt to file: successfully?: " <> file_success_string
-
       }),
     )
     |> glint.run_and_handle(argv.load().arguments, with: fn(x: String) {

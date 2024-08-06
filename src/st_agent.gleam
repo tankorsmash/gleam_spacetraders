@@ -26,7 +26,8 @@ pub type Agent {
 }
 
 pub fn decode_agent(dynamic: dynamic.Dynamic) {
-  dynamic.decode6(
+  dynamic
+  |> dynamic.decode6(
     Agent,
     dynamic.field("accountId", dynamic.string),
     dynamic.field("symbol", dynamic.string),
@@ -34,12 +35,17 @@ pub fn decode_agent(dynamic: dynamic.Dynamic) {
     dynamic.field("credits", dynamic.int),
     dynamic.field("startingFaction", dynamic.string),
     dynamic.field("shipCount", dynamic.int),
-  )(dynamic)
+  )
 }
 
 pub fn get_my_agent(client) {
+  let decoder =
+    st_response.debug_decoder(
+      st_response.decode_api_response(st_response.decode_data(decode_agent)),
+    )
+
   client
-  |> falcon.get("/my/agent", Json(st_response.decode_api_response(decode_agent)), [])
+  |> falcon.get("/my/agent", Json(decoder), [])
 }
 
 pub fn register_agent(

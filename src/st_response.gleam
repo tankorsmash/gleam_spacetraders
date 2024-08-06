@@ -160,7 +160,7 @@ pub fn string_format_decode_errors(errors: List(dynamic.DecodeError)) -> String 
 
 pub fn debug_decoder(decoder) {
   fn(val) {
-    io.debug(val)
+    pprint.debug(val)
     decoder(val)
   }
 }

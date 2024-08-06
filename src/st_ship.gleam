@@ -888,17 +888,17 @@ pub type ExtractionOutput {
 }
 
 pub fn set_ship_to_extract_resources(client: falcon.Client, ship_symbol: String) {
-  let url =
-     "/my/ships/" <> ship_symbol <> "/extract" 
-
+  let url = "/my/ships/" <> ship_symbol <> "/extract"
   let decoder =
-    st_response.decode_api_response(dynamic.decode4(
-      ExtractionOutput,
-      dynamic.field("cooldown", decode_cooldown),
-      dynamic.field("extraction", decode_extraction),
-      dynamic.field("cargo", decode_cargo),
-      dynamic.field("events", dynamic.list(dynamic.dynamic)),
-    ))
+    st_response.decode_api_response(
+      st_response.decode_data(dynamic.decode4(
+        ExtractionOutput,
+        dynamic.field("cooldown", decode_cooldown),
+        dynamic.field("extraction", decode_extraction),
+        dynamic.field("cargo", decode_cargo),
+        dynamic.field("events", dynamic.list(dynamic.dynamic)),
+      )),
+    )
 
   client
   |> falcon.post(url, Json(decoder), options: [], body: "")
