@@ -434,7 +434,13 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
     <> " -- "
     <> fuel_string
     <> "\n Inv: "
-    <> int.to_string(list.length(ship.cargo.inventory))
+    <> {
+      list.map(
+        ship.cargo.inventory,
+        fn(item) { item.symbol <> " x" <> int.to_string(item.units) },
+      )
+      |> string.join(", ")
+    }
     <> "\n Mods: "
     <> string.join(module_names, ", ")
     <> case ship.nav.status {
