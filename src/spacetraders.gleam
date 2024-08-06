@@ -187,43 +187,58 @@ fn register_agent(input: glint.CommandInput) -> String {
 
 fn view_waypoints(input: glint.CommandInput) -> String {
   io.println("viewing waypints")
-  let assert Ok(system_symbol) =
-    flag.get_string(from: input.flags, for: system_flag_name)
+  let waypoints = {
+    use system_symbol <- result.try(flag.get_string(
+      from: input.flags,
+      for: system_flag_name,
+    ))
 
-  let assert Ok(raw_trait_names) =
-    flag.get_strings(input.flags, traits_flag_name)
-  let traits: List(st_waypoint.Trait) =
-    raw_trait_names
-    |> list.map(fn(trait_symbol) {
-      st_waypoint.Trait(string.uppercase(trait_symbol), "", "")
-    })
-  let raw_waypoint_type = flag.get_string(input.flags, waypoint_type_flag_name)
+    use raw_trait_names <- result.try(flag.get_strings(
+      input.flags,
+      traits_flag_name,
+    ))
+    let traits: List(st_waypoint.Trait) =
+      raw_trait_names
+      |> list.map(fn(trait_symbol) {
+        st_waypoint.Trait(string.uppercase(trait_symbol), "", "")
+      })
+    use raw_waypoint_type <- result.try(flag.get_string(
+      input.flags,
+      waypoint_type_flag_name,
+    ))
 
-  let waypoint_type: option.Option(st_waypoint.WaypointType) = case
-    raw_waypoint_type
-  {
-    Ok(raw_waypoint_type) -> {
+    let waypoint_type: option.Option(st_waypoint.WaypointType) =
       dynamic.from(raw_waypoint_type)
       |> st_response.debug_decoder(st_waypoint.decode_waypoint_type()(_))
       |> option.from_result()
-    }
-    Error(_) -> option.None
+
+    let client = create_client()
+    // let assert Ok(resp) =
+      st_waypoint.get_waypoints_for_system(
+        client,
+        system_symbol,
+        waypoint_type: io.debug(waypoint_type),
+        traits: traits,
+      )
+      |>string.inspect
+      |> Ok
+    // case resp {
+    //   Ok(waypoints) -> {
+    //     Ok(st_waypoint.show_traits_for_waypoints(waypoints))
+    //   }
+    //   Error(_error) -> {
+    //     // Error(error)
+    //     Ok("ERROR")
+    //   }
+    // }
   }
 
-  let resp =
-    create_client()
-    |> st_waypoint.get_waypoints_for_system(
-      system_symbol,
-      waypoint_type: io.debug(waypoint_type),
-      traits: io.debug(traits),
-    )
-    |> st_response.expect_body_result
-  case resp {
+  case waypoints {
     Ok(waypoints) -> {
-      st_waypoint.show_traits_for_waypoints(waypoints)
+      waypoints
     }
-    Error(api_error) -> {
-      api_error.message <> "\n" <> string.inspect(api_error.data)
+    Error(error) -> {
+      string.inspect(error)
     }
   }
 }
@@ -435,10 +450,9 @@ fn view_my_ships(_input: glint.CommandInput) -> String {
     <> fuel_string
     <> "\n Inv: "
     <> {
-      list.map(
-        ship.cargo.inventory,
-        fn(item) { item.symbol <> " x" <> int.to_string(item.units) },
-      )
+      list.map(ship.cargo.inventory, fn(item) {
+        item.symbol <> " x" <> int.to_string(item.units)
+      })
       |> string.join(", ")
     }
     <> "\n Mods: "
