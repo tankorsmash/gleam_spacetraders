@@ -121,6 +121,7 @@ pub fn expect_body_result(resp: FalconResult(value)) -> value {
   // |> expect_status(200)
   |> core.extract_body
 }
+
 /// gets the body from a response, after making sure it's a 200
 pub fn expect_200_body_result(resp: FalconResult(value)) -> value {
   resp
@@ -298,4 +299,14 @@ pub fn test_efetch(req: request.Request(String), decoder) {
       }
     }
   }
+}
+
+///decodes either an int or a float into a float
+/// this is because spacetraders sometimes returns ints as floats (ie Reactor condition)
+pub fn decode_int_based_float(dynamic) {
+  dynamic
+  |> dynamic.any([
+    fn(dynamic) { dynamic |> dynamic.int |> result.map(int.to_float) },
+    dynamic.float,
+  ])
 }

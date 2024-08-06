@@ -233,7 +233,7 @@ pub type Reactor {
     symbol: String,
     name: String,
     description: String,
-    condition: Int,
+    condition: Float,
     power_output: Int,
     requirements: Requirements,
   )
@@ -493,7 +493,7 @@ pub fn decode_reactor(dynamic: dynamic.Dynamic) {
     dynamic.field("symbol", dynamic.string),
     dynamic.field("name", dynamic.string),
     dynamic.field("description", dynamic.string),
-    dynamic.field("condition", dynamic.int),
+    dynamic.field("condition", st_response.decode_int_based_float),
     dynamic.field("powerOutput", dynamic.int),
     dynamic.field("requirements", decode_requirements),
   )

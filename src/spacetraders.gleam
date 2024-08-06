@@ -627,6 +627,7 @@ pub fn set_ship_to_extract(input: glint.CommandInput) -> String {
     create_client()
     |> st_ship.set_ship_to_extract_resources(ship_symbol)
   extraction_falcon_result
+  |> st_response.expect_200_body_result
   |> string.inspect
 }
 
