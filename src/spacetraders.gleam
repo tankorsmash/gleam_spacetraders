@@ -88,7 +88,7 @@ const agent_name_flag_name = "agent_name"
 
 fn agent_name_flag() -> flag.FlagBuilder(String) {
   flag.string()
-  |> flag.default("TANKOR_SMASH")
+  |> flag.default("BADGER")
   |> flag.description("agent name")
 }
 
