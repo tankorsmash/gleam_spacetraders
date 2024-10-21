@@ -214,14 +214,14 @@ fn view_waypoints(input: glint.CommandInput) -> String {
 
     let client = create_client()
     // let assert Ok(resp) =
-      st_waypoint.get_waypoints_for_system(
-        client,
-        system_symbol,
-        waypoint_type: io.debug(waypoint_type),
-        traits: traits,
-      )
-      |>string.inspect
-      |> Ok
+    st_waypoint.get_waypoints_for_system(
+      client,
+      system_symbol,
+      waypoint_type: io.debug(waypoint_type),
+      traits: traits,
+    )
+    |> string.inspect
+    |> Ok
     // case resp {
     //   Ok(waypoints) -> {
     //     Ok(st_waypoint.show_traits_for_waypoints(waypoints))
